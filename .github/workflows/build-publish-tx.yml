@@ -1,0 +1,108 @@
+name: Build Publish Transaction Bytes
+
+on:
+  workflow_dispatch:
+    inputs:
+      sui_tools_image:
+        description: "Image reference of sui_tools"
+        default: "mysten/sui-tools:mainnet"
+        type: choice
+        options:
+          - "mysten/sui-tools:mainnet"
+          - "mysten/sui-tools:testnet"
+          - "mysten/sui-tools:devnet"
+      rpc:
+        description: "RPC URL"
+        required: true
+        default: "https://mysten-rpc.testnet.sui.io:443"
+        type: choice
+        options:
+          - "https://mysten-rpc.mainnet.sui.io:443"
+          - "https://mysten-rpc.testnet.sui.io:443"
+          - "https://mysten-rpc.devnet.sui.io:443"
+      gas_object_id:
+        description: "Gas coin ID (e.g. from multisig account)"
+        required: true
+        type: string
+        default: "0x0123..."
+
+jobs:
+  publish_contract_bytes:
+    name: Serialize Publish TX Bytes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Retrieve Project Source Code
+        uses: actions/checkout@v3
+
+      - name: Create client.yaml and keystore
+        working-directory: .
+        env:
+          NETWORK: mainnet
+          RPC: ${{ inputs.rpc }}
+          PRIVATE_KEY: ${{ secrets.SUI_PRIVATE_KEY }}
+        run: |
+          mkdir sui_config
+          echo "[\"$PRIVATE_KEY\"]" > sui_config/sui.keystore
+          cat <<EOF > sui_config/client.yaml
+          ---
+          keystore:
+            File: $HOME/.sui/sui_config/sui.keystore
+          envs:
+            - alias: $NETWORK
+              rpc: "$RPC"
+              ws: ~
+          EOF
+          mkdir $HOME/.sui
+          cp -r sui_config $HOME/.sui/sui_config
+
+      - name: Set up Sui Environment
+        working-directory: scripts/src/production
+        env:
+          CONTAINER_NAME: "tmp_cont_${{ github.run_id }}"
+        run: |
+          echo "Using container name: ${CONTAINER_NAME}"
+          echo "Using Sui tools image: ${{ inputs.sui_tools_image }}"
+          docker pull docker.io/${{ inputs.sui_tools_image }}
+          docker create --name "${CONTAINER_NAME}" docker.io/${{ inputs.sui_tools_image }}
+          docker cp "${CONTAINER_NAME}:/usr/local/bin/sui" ./sui
+          docker rm "${CONTAINER_NAME}"
+
+      - name: Set up Node.js Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install PNPM globally
+        run: |
+          npm install -g pnpm
+
+      - name: Set up working directory
+        run: |
+          cd scripts && pnpm install
+
+      - name: Serialize Publish Transaction Bytes
+        env:
+          GAS_OBJECT: ${{ inputs.gas_object_id }}
+        run: |
+          cd scripts/src/production && chmod +x serializePublishTx.sh && ./serializePublishTx.sh
+
+      - name: Show Transaction Data (To sign)
+        run: |
+          cat "${{ github.workspace }}/scripts/tx/publish-tx-data.txt"
+
+      - name: Verify Directory Exists
+        run: |
+          if [ -d "scripts/tx/" ]; then
+            echo "Directory exists";
+            ls -l scripts/tx/;
+          else
+            echo "Directory does not exist!";
+            exit 1;
+          fi
+
+      - name: Upload Transaction Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: publish-tx-serialized-bytes
+          path: scripts/tx/
