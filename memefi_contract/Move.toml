@@ -1,5 +1,5 @@
 [package]
-name = "memefi_coin"
+name = "memefi"
 version = "0.0.1"
 edition = "2024.beta"
 license = "MIT"
@@ -9,6 +9,4 @@ authors = [""]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
-memefi_coin = "0x0"
 memefi = "0x0"
-std = "0x1"
