@@ -20,7 +20,7 @@ fi
 
 # Define paths for the Move files and output
 BASE_DIR=$(pwd)
-MOVE_PATH="$BASE_DIR/../../../memefi_coin"
+MOVE_PATH="$BASE_DIR/../../../memefi_contract"
 TX_OUTPUT_DIR="$BASE_DIR/../../tx"
 TX_OUTPUT_FILE="${TX_OUTPUT_DIR}/publish-tx-data.txt"
 
