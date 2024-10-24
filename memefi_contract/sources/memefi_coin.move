@@ -1,29 +1,35 @@
 module memefi::memefi_coin;
 
-use sui::coin::{Self, TreasuryCap};
+use sui::coin;
+use sui::pay;
 
+/// The total supply of `MEMEFI` coins.
+const TOTAL_SUPPLY_MEMEFI: u64 = 10_000_000_000;
+
+/// Name of the coin
 public struct MEMEFI_COIN has drop {}
 
-fun init(witness: MEMEFI_COIN, ctx: &mut TxContext) {
-    let (treasury, metadata) = coin::create_currency(
-        witness,
-        18,
+fun init(otw: MEMEFI_COIN, ctx: &mut TxContext) {
+    // Create the `MEMEFI` supply
+    let (mut treasury, metadata) = coin::create_currency(
+        otw,
+        9,
         b"MEMEFI_COIN",
-        b"",
+        b"Memefi Coin",
         b"https://memefi.club",
         option::none(),
         ctx,
     );
-    transfer::public_freeze_object(metadata);
-    transfer::public_transfer(treasury, ctx.sender())
-}
 
-public fun mint(
-    treasury_cap: &mut TreasuryCap<MEMEFI_COIN>,
-    amount: u64,
-    recipient: address,
-    ctx: &mut TxContext,
-) {
-    let coin = coin::mint(treasury_cap, amount, ctx);
-    transfer::public_transfer(coin, recipient)
+    transfer::public_freeze_object(metadata);
+
+    // Mint the total supply of `MEMEFI` tokens.
+    let balance = treasury.mint_balance(TOTAL_SUPPLY_MEMEFI);
+    let coin = coin::from_balance(balance, ctx);
+
+    // Send all `MEMEFI` tokens to the publisher.
+    pay::keep(coin, ctx);
+
+    // Permanently freeze the `TreasuryCap`. Can not be used mutable ever again.
+    transfer::public_freeze_object(treasury);
 }
