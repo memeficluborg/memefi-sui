@@ -45,6 +45,8 @@ public struct AdminRole() has drop;
 /// Represents a role responsible for freezing or unfreezing users.
 public struct FreezerRole() has drop;
 
+// === Internal functions ===
+
 /// Initializes and returns a new `Roles` struct.
 public(package) fun new(ctx: &mut TxContext): Roles {
     Roles { data: bag::new(ctx), admin_count: 0 }

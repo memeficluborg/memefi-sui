@@ -4,9 +4,11 @@ use memefi::roles::{Self, Roles, AdminRole, FreezerRole};
 use std::string::String;
 use sui::coin::Coin;
 use sui::event;
+use sui::package::{Self, Publisher};
 use sui::table::{Self, Table};
 
 const EAlreadyAirdropped: u64 = 0;
+const EWrongPublisher: u64 = 1;
 
 /// [Shared] AirdropRegistry is a shared object that manages roles and maintains a
 /// denylist for airdrop actions.
@@ -26,9 +28,14 @@ public struct AirdropEvent<phantom T> has copy, drop {
     value: u64,
 }
 
+// Define a OTW for claiming the `Publisher` object.
+public struct AIRDROP has drop {}
+
 /// Initializes the AirdropRegistry and assigns the sender as the initial admin and
 /// freezer. The registry is shared on the network for further actions.
-fun init(ctx: &mut TxContext) {
+fun init(otw: AIRDROP, ctx: &mut TxContext) {
+    package::claim_and_keep(otw, ctx);
+
     // Create the `AirdropRegistry` and share it on the network.
     let mut airdrop_registry = AirdropRegistry {
         id: object::new(ctx),
@@ -105,6 +112,74 @@ public fun unfreeze_user(
     self.denylist_remove(user_id, ctx);
 }
 
+// --- Authorize / Deauthorize Role functions ---
+
+/// Publisher can authorize an address with the `AdminRole` in the `AirdropRegistry`.
+public fun authorize_admin(
+    pub: &Publisher,
+    registry: &mut AirdropRegistry,
+    addr: address,
+    _ctx: &mut TxContext,
+) {
+    assert!(pub.from_package<AdminRole>(), EWrongPublisher);
+
+    registry
+        .roles_mut()
+        .authorize<AdminRole, _>(
+            roles::new_role<AdminRole>(addr),
+            true,
+        );
+}
+
+/// Publisher can authorize an address with the `AdminRole` in the `AirdropRegistry`.
+public fun deauthorize_admin(
+    pub: &Publisher,
+    registry: &mut AirdropRegistry,
+    addr: address,
+    _ctx: &mut TxContext,
+) {
+    assert!(pub.from_package<AdminRole>(), EWrongPublisher);
+
+    registry
+        .roles_mut()
+        .deauthorize<AdminRole, bool>(
+            roles::new_role<AdminRole>(addr),
+        );
+}
+
+/// Publisher can authorize an address with the `FreezerRole` in the `AirdropRegistry`.
+public fun authorize_freezer(
+    pub: &Publisher,
+    registry: &mut AirdropRegistry,
+    addr: address,
+    _ctx: &mut TxContext,
+) {
+    assert!(pub.from_package<FreezerRole>(), EWrongPublisher);
+
+    registry
+        .roles_mut()
+        .authorize<FreezerRole, _>(
+            roles::new_role<FreezerRole>(addr),
+            true,
+        );
+}
+
+/// Publisher can authorize an address with the `FreezerRole` in the `AirdropRegistry`.
+public fun deauthorize_freezer(
+    pub: &Publisher,
+    registry: &mut AirdropRegistry,
+    addr: address,
+    _ctx: &mut TxContext,
+) {
+    assert!(pub.from_package<FreezerRole>(), EWrongPublisher);
+
+    registry
+        .roles_mut()
+        .deauthorize<FreezerRole, bool>(
+            roles::new_role<FreezerRole>(addr),
+        );
+}
+
 // === Internal functions ===
 
 /// [Internal] Adds a user_id to the `AirdropRegistry` denylist.
@@ -151,5 +226,5 @@ public fun is_airdropped(self: &AirdropRegistry, user_id: String): bool {
 
 #[test_only]
 public(package) fun test_init(ctx: &mut TxContext) {
-    init(ctx);
+    init(AIRDROP {}, ctx);
 }

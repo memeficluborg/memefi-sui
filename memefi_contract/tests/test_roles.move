@@ -1,6 +1,9 @@
 module memefi::test_roles;
 
+use memefi::airdrop::{Self, AirdropRegistry};
 use memefi::roles::{Self, AdminRole, FreezerRole};
+use sui::package::Publisher;
+use sui::test_scenario as ts;
 
 #[test, expected_failure(abort_code = ::memefi::roles::ERoleAlreadyExists)]
 fun authorize_twice() {
@@ -59,4 +62,46 @@ fun cannot_pause_admin() {
     roles.pause<AdminRole>();
 
     abort 8
+}
+
+#[test]
+fun publisher_authorizes_new_admin() {
+    let mut ts = ts::begin(@0x2);
+    airdrop::test_init(ts.ctx());
+
+    ts::next_tx(&mut ts, @0x2);
+    let publisher = ts::take_from_sender<Publisher>(&ts);
+    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
+
+    airdrop::authorize_admin(&publisher, &mut registry, @0x5, ts.ctx());
+
+    ts::next_tx(&mut ts, @0x2);
+    assert!(registry.roles().is_authorized<AdminRole>(@0x5));
+
+    ts::return_shared(registry);
+    ts::return_to_sender(&ts, publisher);
+    ts::end(ts);
+}
+
+#[test]
+fun publisher_deauthorizes_any_admin() {
+    let mut ts = ts::begin(@0x2);
+    airdrop::test_init(ts.ctx());
+
+    ts::next_tx(&mut ts, @0x2);
+    let publisher = ts::take_from_sender<Publisher>(&ts);
+    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
+
+    airdrop::authorize_admin(&publisher, &mut registry, @0x5, ts.ctx());
+
+    ts::next_tx(&mut ts, @0x2);
+    assert!(registry.roles().is_authorized<AdminRole>(@0x5));
+
+    ts::next_tx(&mut ts, @0x2);
+    airdrop::deauthorize_admin(&publisher, &mut registry, @0x5, ts.ctx());
+    assert!(!registry.roles().is_authorized<AdminRole>(@0x5));
+
+    ts::return_shared(registry);
+    ts::return_to_sender(&ts, publisher);
+    ts::end(ts);
 }
