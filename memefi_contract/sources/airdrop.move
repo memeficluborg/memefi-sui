@@ -60,7 +60,7 @@ fun init(ctx: &mut TxContext) {
 /// Airdrops a specified value of tokens to a user and adds the user's ID to the denylist.
 /// The sender must have the `AdminRole` to execute the airdrop.
 /// Aborts with `sui::balance::ENotEnough` if `value > coin` value.
-public fun do<T>(
+public fun new<T>(
     self: &mut Coin<T>,
     value: u64,
     user_id: String,
@@ -147,4 +147,9 @@ public(package) fun assert_is_not_airdropped(self: &AirdropRegistry, user_id: St
 /// Returns `true` if the user_id is found, otherwise `false`.
 public fun is_airdropped(self: &AirdropRegistry, user_id: String): bool {
     table::contains(&self.denylist, user_id)
+}
+
+#[test_only]
+public(package) fun test_init(ctx: &mut TxContext) {
+    init(ctx);
 }
