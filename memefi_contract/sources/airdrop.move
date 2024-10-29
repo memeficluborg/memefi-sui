@@ -1,8 +1,9 @@
 module memefi::airdrop;
 
 use memefi::roles::{Self, Roles, AdminRole, FreezerRole};
+use memefi::vault::Vault;
 use std::string::String;
-use sui::coin::Coin;
+use sui::coin;
 use sui::event;
 use sui::package::{Self, Publisher};
 use sui::table::{Self, Table};
@@ -68,7 +69,7 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
 /// The sender must have the `AdminRole` to execute the airdrop.
 /// Aborts with `sui::balance::ENotEnough` if `value > coin` value.
 public fun new<T>(
-    self: &mut Coin<T>,
+    self: &mut Vault<T>,
     value: u64,
     user_id: String,
     user_addr: address,
@@ -81,8 +82,8 @@ public fun new<T>(
     // Ensure the user has not been airdropped already.
     assert_is_not_airdropped(registry, user_id);
 
-    // Create a new `Coin<T>` to be airdropped.
-    let airdrop_coin = self.split(value, ctx);
+    // Withdraw the required balance from the Vault and create a new `Coin<T>`.
+    let airdrop_coin = coin::take<T>(self.balance_mut<T>(), value, ctx);
     event::emit(AirdropEvent<T> { addr: user_addr, value: airdrop_coin.value() });
 
     // Add the user's ID in the denylist.
@@ -164,7 +165,7 @@ public fun authorize_freezer(
         );
 }
 
-/// Publisher can authorize an address with the `FreezerRole` in the `AirdropRegistry`.
+/// Publisher can deauthorize an address with the `FreezerRole` in the `AirdropRegistry`.
 public fun deauthorize_freezer(
     pub: &Publisher,
     registry: &mut AirdropRegistry,

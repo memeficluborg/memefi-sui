@@ -1,13 +1,13 @@
 module memefi::test_airdrop;
 
 use memefi::airdrop::{Self, AirdropRegistry};
-use memefi::roles::{AdminRole, FreezerRole};
+use memefi::roles::{Self, AdminRole, FreezerRole, VaultManagerRole};
 use memefi::test_memefi::{Self, TEST_MEMEFI};
 use memefi::treasury;
+use memefi::vault::{Self, Vault};
 use std::string;
 use sui::coin::{Self, Coin};
 use sui::package::Publisher;
-use sui::pay;
 use sui::test_scenario::{Self as ts, Scenario};
 use sui::test_utils;
 
@@ -49,11 +49,10 @@ fun test_new_airdrop() {
     assert!(user_coin.value() == AIRDROP_AMOUNT);
     ts::return_to_sender(&ts, user_coin);
 
-    // Check that admin's coin value is (TOTAL_SUPPLY - AIRDROP_AMOUNT)
+    // Check that Vault's balance is (TOTAL_SUPPLY - AIRDROP_AMOUNT)
     ts::next_tx(&mut ts, @0x2);
-    let admin_coin = ts::take_from_sender<Coin<TEST_MEMEFI>>(&ts);
-    assert!(admin_coin.value() == TOTAL_SUPPLY - AIRDROP_AMOUNT);
-    ts::return_to_sender(&ts, admin_coin);
+    let vault = ts::take_shared<Vault<TEST_MEMEFI>>(&ts);
+    assert!(vault.balance<TEST_MEMEFI>() == TOTAL_SUPPLY - AIRDROP_AMOUNT);
 
     // Check that user is in denylist after getting the airdrop.
     ts::next_tx(&mut ts, @0x2);
@@ -61,6 +60,7 @@ fun test_new_airdrop() {
     assert!(airdrop::is_airdropped(&registry, string::utf8(USER_ID)));
 
     ts::return_shared(registry);
+    ts::return_shared(vault);
     ts::end(ts);
 }
 
@@ -70,11 +70,11 @@ fun airdrop_twice() {
     test_create_airdrop(&mut ts, @0x2);
 
     ts::next_tx(&mut ts, @0x2);
-    let mut admin_coin = ts::take_from_sender<Coin<TEST_MEMEFI>>(&ts);
+    let mut vault = ts::take_shared<Vault<TEST_MEMEFI>>(&ts);
     let mut registry = ts::take_shared<AirdropRegistry>(&ts);
 
     airdrop::new(
-        &mut admin_coin,
+        &mut vault,
         AIRDROP_AMOUNT,
         string::utf8(USER_ID),
         USER_ADDR,
@@ -82,8 +82,8 @@ fun airdrop_twice() {
         ts.ctx(),
     );
 
-    ts::return_to_sender(&ts, admin_coin);
     ts::return_shared(registry);
+    ts::return_shared(vault);
     ts::end(ts);
 }
 
@@ -188,19 +188,39 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
     airdrop::test_init(ts.ctx());
 
     ts::next_tx(ts, admin);
+    let mut vault = vault::new<TEST_MEMEFI>(ts.ctx());
+    vault
+        .roles_mut()
+        .authorize<AdminRole, _>(
+            roles::new_role<AdminRole>(admin),
+            true,
+        );
+
+    vault
+        .roles_mut()
+        .authorize<VaultManagerRole, _>(
+            roles::new_role<VaultManagerRole>(admin),
+            true,
+        );
+
+    vault.share();
 
     // Mint the total supply of `MEMEFI` tokens and send the whole supply to admin.
+    ts::next_tx(ts, admin);
     let balance = treasury_cap.mint_balance(TOTAL_SUPPLY);
     let coin = coin::from_balance(balance, ts.ctx());
-    pay::keep(coin, ts.ctx());
+
+    ts::next_tx(ts, admin);
+    let mut vault = ts::take_shared<Vault<TEST_MEMEFI>>(ts);
+    vault.put<TEST_MEMEFI>(coin, ts.ctx());
+
     let wrapped_treasury = treasury::wrap(treasury_cap, ts.ctx());
 
     ts::next_tx(ts, admin);
-    let mut main_coin = ts::take_from_sender<Coin<TEST_MEMEFI>>(ts);
     let mut registry = ts::take_shared<AirdropRegistry>(ts);
 
     airdrop::new(
-        &mut main_coin,
+        &mut vault,
         AIRDROP_AMOUNT,
         string::utf8(USER_ID),
         USER_ADDR,
@@ -209,7 +229,7 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
     );
 
     ts::next_tx(ts, admin);
-    ts::return_to_sender(ts, main_coin);
     ts::return_shared(registry);
     test_utils::destroy(wrapped_treasury);
+    ts::return_shared(vault);
 }
