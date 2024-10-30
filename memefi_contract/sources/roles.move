@@ -164,3 +164,9 @@ public(package) fun data(roles: &Roles): &Bag {
 public(package) fun addr<R: drop>(role: &Role<R>): address {
     role.addr
 }
+
+/// Destroy the `Roles` bag if it's empty.
+public(package) fun destroy_empty(roles: Roles) {
+    let Roles { data, .. } = roles;
+    data.destroy_empty()
+}

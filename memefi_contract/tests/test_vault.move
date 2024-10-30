@@ -8,3 +8,4 @@ fun test_vault_initialization() {
     let mut ctx = tx_context::dummy();
     vault::test_init(&mut ctx);
 }
+

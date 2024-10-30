@@ -6,7 +6,11 @@ use sui::balance::{Self, Balance};
 use sui::coin::{Self, Coin};
 use sui::package::Publisher;
 
+/// The maximum limit of tokens that can be taken out of the `Vault` in one transaction.
+const MAX_TOKEN_LIMIT: u64 = 50_000;
+
 const EWrongPublisher: u64 = 1;
+const EWithdrawNotAllowed: u64 = 2;
 
 /// [Shared] Vault for holding a `Balance<T>` with controlled access.
 public struct Vault<phantom T> has key {
@@ -60,7 +64,22 @@ public fun take<T: drop>(self: &mut Vault<T>, value: u64, ctx: &mut TxContext): 
     // Ensure the sender is authorized with `VaultManagerRole`.
     self.roles().assert_is_authorized<VaultManagerRole>(ctx.sender());
 
+    // Abort if the value is greater than the allowed `MAX_TOKEN_LIMIT`.
+    assert!(value <= MAX_TOKEN_LIMIT, EWithdrawNotAllowed);
+
     coin::take<T>(&mut self.balance, value, ctx)
+}
+
+/// Withdraw all balance from `Vault`.
+/// The sender must be authorised with the `AdminRole`.
+/// This is for extreme cases where the funds need to return to the treasury address.
+public fun withdraw<T: drop>(self: &mut Vault<T>, ctx: &mut TxContext): Coin<T> {
+    // Ensure the sender is authorized with `AdminRole`.
+    self.roles().assert_is_authorized<AdminRole>(ctx.sender());
+
+    // Withdraw all balance and wrap it into a coin.
+    let vault_balance = self.balance.withdraw_all();
+    coin::from_balance<T>(vault_balance, ctx)
 }
 
 // --- Authorize / Deauthorize Role functions ---
@@ -152,6 +171,21 @@ public(package) fun new<T>(ctx: &mut TxContext): Vault<T> {
         roles: roles::new(ctx),
         balance: balance::zero<T>(),
     }
+}
+
+/// Delete a `Vault` as long as the `Roles` are empty and balance is zero.
+/// Aborts with `EBagNotEmpty` if the bag still contains values.
+/// Aborts with `ENonZero` if balance still has a value.
+public(package) fun delete<T>(self: Vault<T>, _ctx: &mut TxContext) {
+    let Vault {
+        id,
+        roles,
+        balance,
+    } = self;
+
+    roles.destroy_empty();
+    balance.destroy_zero();
+    id.delete();
 }
 
 /// Returns a mutable reference to the `Vault` Roles for internal modifications.
