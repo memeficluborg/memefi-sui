@@ -1,10 +1,11 @@
 module memefi::test_airdrop;
 
 use memefi::airdrop::{Self, AirdropRegistry};
-use memefi::roles::{Self, AdminRole, FreezerRole, VaultManagerRole};
+use memefi::roles::{AdminRole, FreezerRole};
 use memefi::test_memefi::{Self, TEST_MEMEFI};
+use memefi::test_vault;
 use memefi::treasury;
-use memefi::vault::{Self, Vault};
+use memefi::vault::Vault;
 use std::string;
 use sui::coin::{Self, Coin};
 use sui::package::Publisher;
@@ -188,22 +189,7 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
     airdrop::test_init(ts.ctx());
 
     ts::next_tx(ts, admin);
-    let mut vault = vault::new<TEST_MEMEFI>(ts.ctx());
-    vault
-        .roles_mut()
-        .authorize<AdminRole, _>(
-            roles::new_role<AdminRole>(admin),
-            true,
-        );
-
-    vault
-        .roles_mut()
-        .authorize<VaultManagerRole, _>(
-            roles::new_role<VaultManagerRole>(admin),
-            true,
-        );
-
-    vault.share();
+    test_vault::create_test_vault_with_admin<TEST_MEMEFI>(ts, admin);
 
     // Mint the total supply of `MEMEFI` tokens and send the whole supply to admin.
     ts::next_tx(ts, admin);
