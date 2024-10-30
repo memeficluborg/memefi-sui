@@ -1,7 +1,7 @@
 module memefi::airdrop;
 
 use memefi::roles::{Self, Roles, AdminRole, FreezerRole};
-use memefi::vault::Vault;
+use memefi::safe::Safe;
 use std::string::String;
 use sui::coin;
 use sui::event;
@@ -69,7 +69,7 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
 /// The sender must have the `AdminRole` to execute the airdrop.
 /// Aborts with `sui::balance::ENotEnough` if `value > coin` value.
 public fun new<T>(
-    self: &mut Vault<T>,
+    self: &mut Safe<T>,
     value: u64,
     user_id: String,
     user_addr: address,
@@ -82,7 +82,7 @@ public fun new<T>(
     // Ensure the user has not been airdropped already.
     assert_is_not_airdropped(registry, user_id);
 
-    // Withdraw the required balance from the Vault and create a new `Coin<T>`.
+    // Withdraw the required balance from the Safe and create a new `Coin<T>`.
     let airdrop_coin = coin::take<T>(self.balance_mut<T>(), value, ctx);
     event::emit(AirdropEvent<T> { addr: user_addr, value: airdrop_coin.value() });
 

@@ -17,6 +17,7 @@ const EAlreadyPaused: u64 = 5;
 const EAlreadyUnpaused: u64 = 6;
 /// Tries to deauthorize a role that does not exist.
 const ERoleNotExists: u64 = 7;
+/// Tries to pause an admin role.
 const ECannotPauseAdmin: u64 = 8;
 
 /// The `Roles` struct is generic and uses a `Bag` to store different roles and their
@@ -45,8 +46,8 @@ public struct AdminRole() has drop;
 /// Represents a role responsible for freezing or unfreezing users.
 public struct FreezerRole() has drop;
 
-/// Represents a role that can manage a `Vault`.
-public struct VaultManagerRole() has drop;
+/// Represents a role that can manage a `Safe`.
+public struct SafeManagerRole() has drop;
 
 // === Internal functions ===
 
