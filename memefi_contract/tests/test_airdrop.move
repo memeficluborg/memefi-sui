@@ -1,6 +1,6 @@
 module memefi::test_airdrop;
 
-use memefi::airdrop::{Self, AirdropRegistry};
+use memefi::airdrop::{Self, AirdropRegistry, AirdropConfig};
 use memefi::roles::AdminRole;
 use memefi::safe::Safe;
 use memefi::test_memefi::{Self, TEST_MEMEFI};
@@ -66,7 +66,7 @@ fun test_new_airdrop() {
 #[test, expected_failure(abort_code = ::memefi::airdrop::EAlreadyAirdropped)]
 fun airdrop_twice() {
     let mut ts = ts::begin(@0x2);
-    test_create_airdrop(&mut ts, @0x2);
+    let mut airdrop_config = test_create_airdrop(&mut ts, @0x2);
 
     ts::next_tx(&mut ts, @0x2);
     let mut safe = ts::take_shared<Safe<TEST_MEMEFI>>(&ts);
@@ -78,6 +78,7 @@ fun airdrop_twice() {
         string::utf8(USER_ID),
         USER_ADDR,
         &mut registry,
+        &mut airdrop_config,
         ts.ctx(),
     );
 
@@ -87,7 +88,7 @@ fun airdrop_twice() {
 }
 
 #[test_only]
-public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
+public fun test_create_airdrop(ts: &mut Scenario, admin: address): AirdropConfig {
     ts::next_tx(ts, admin);
     let mut treasury_cap = test_memefi::create_test_treasury(ts.ctx());
     airdrop::test_init(ts.ctx());
@@ -108,6 +109,7 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
 
     ts::next_tx(ts, admin);
     let mut registry = ts::take_shared<AirdropRegistry>(ts);
+    let mut airdrop_config = airdrop::create_airdrop_config(ts.ctx());
 
     airdrop::send_token(
         &mut safe,
@@ -115,6 +117,7 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
         string::utf8(USER_ID),
         USER_ADDR,
         &mut registry,
+        &mut airdrop_config,
         ts.ctx(),
     );
 
@@ -122,4 +125,6 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
     ts::return_shared(registry);
     test_utils::destroy(wrapped_treasury);
     ts::return_shared(safe);
+
+    airdrop_config
 }

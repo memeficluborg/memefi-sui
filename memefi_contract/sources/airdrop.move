@@ -20,7 +20,11 @@ use sui::event;
 use sui::package::{Self, Publisher};
 use sui::table::{Self, Table};
 
+/// The maximum number of tokens that can be sent in one PTB.
+const MAX_TOKEN_LIMIT: u64 = 50_000;
+
 const EAlreadyAirdropped: u64 = 0;
+const ETokenLimitExceeded: u64 = 1;
 
 /// [Shared] AirdropRegistry is a shared object that manages roles and maintains a
 /// record for airdrop actions.
@@ -30,8 +34,11 @@ public struct AirdropRegistry has key {
     record: Table<String, bool>,
 }
 
-/// [Helper] An empty struct to mock custom configurations per role.
-public struct AirdropConfig() has store, drop;
+/// Helper configuration object for managing token limits in a transaction (PTB).
+public struct AirdropConfig has drop {
+    max_token_limit: u64,
+    current_token_sent: u64,
+}
 
 /// AirdropEvent is emitted when tokens are airdropped to an address.
 /// It records the recipient's address and the value of tokens airdropped.
@@ -63,6 +70,15 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
 
 // === Public functions ===
 
+/// Creates a temporary `AirdropConfig` with a maximum token limit for the PTB.
+/// This struct is used to keep track of the total tokens sent during the PTB.
+public fun create_airdrop_config(_ctx: &mut TxContext): AirdropConfig {
+    AirdropConfig {
+        max_token_limit: MAX_TOKEN_LIMIT,
+        current_token_sent: 0,
+    }
+}
+
 /// Airdrops a specified value of tokens to a user and adds the user's ID to the record.
 /// The sender must have the `AdminRole` to execute the airdrop.
 /// Aborts with `sui::balance::ENotEnough` if `value > coin` value.
@@ -72,6 +88,7 @@ public fun send_token<T>(
     user_id: String,
     user_addr: address,
     registry: &mut AirdropRegistry,
+    config: &mut AirdropConfig,
     ctx: &mut TxContext,
 ) {
     // Ensure the sender is authorized with `AdminRole`.
@@ -79,6 +96,10 @@ public fun send_token<T>(
 
     // Ensure the user has not been airdropped already.
     assert!(registry.is_airdropped(user_id) == false, EAlreadyAirdropped);
+
+    // Accumulate token amount in config and check max limit.
+    config.current_token_sent = config.current_token_sent + value;
+    assert!(config.current_token_sent <= config.max_token_limit, ETokenLimitExceeded);
 
     // Withdraw the required balance from the Safe and create a new `Coin<T>`.
     let airdrop_coin = coin::take<T>(self.balance_mut<T>(), value, ctx);
