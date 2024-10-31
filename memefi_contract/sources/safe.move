@@ -18,9 +18,6 @@ use sui::package::Publisher;
 /// The maximum number of tokens that can be sent in one PTB.
 const MAX_TOKEN_LIMIT: u64 = 10_000_000;
 
-/// Tries to take a token of value bigger than the allowed limit in a PTB.
-const ETokenLimitExceeded: u64 = 0;
-
 /// [Shared] Safe for holding a `Balance<T>` with controlled access.
 public struct Safe<phantom T> has key {
     id: UID,
@@ -60,27 +57,6 @@ public fun put<T: drop>(self: &mut Safe<T>, coin: Coin<T>, ctx: &mut TxContext) 
     // Ensure the sender is authorized with `SafeManagerRole`.
     self.roles().assert_has_role<SafeManagerRole>(ctx.sender());
     self.balance.join(coin.into_balance());
-}
-
-/// Take a `Coin` worth of `value` from `Safe` balance.
-/// The sender must be authorised with the `SafeManagerRole`.
-public fun take<T: drop>(
-    self: &mut Safe<T>,
-    value: u64,
-    config: &mut TokenConfig,
-    ctx: &mut TxContext,
-): Coin<T> {
-    // Ensure the sender is authorized with `SafeManagerRole`.
-    self.roles().assert_has_role<SafeManagerRole>(ctx.sender());
-
-    // Accumulate token amount in config and check max limit.
-    config.update_token_config_amount(value);
-    assert!(
-        config.token_config_amount() <= config.token_config_max_limit(),
-        ETokenLimitExceeded,
-    );
-
-    self.balance.split(value).into_coin(ctx)
 }
 
 /// Withdraw all balance from `Safe`.
