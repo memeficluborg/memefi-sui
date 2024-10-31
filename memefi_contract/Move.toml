@@ -1,0 +1,12 @@
+[package]
+name = "memefi"
+version = "0.0.1"
+edition = "2024.beta"
+license = "MIT"
+authors = [""]
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet", override = true }
+
+[addresses]
+memefi = "0x0"
