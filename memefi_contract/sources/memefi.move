@@ -21,9 +21,10 @@ use sui::url;
 
 // === Constants ===
 const DECIMALS: u8 = 18;
-const SYMBOL: vector<u8> = b"MEMEFI"; // TODO: Finalise symbol
-const NAME: vector<u8> = b"MEMEFI"; // TODO: Finalise coin name
-const DESCRIPTION: vector<u8> = b"MEMEFI coin issued by memefi club."; // TODO: Finalise description
+const SYMBOL: vector<u8> = b"MEMEFI";
+const NAME: vector<u8> = b"MEMEFI";
+const DESCRIPTION: vector<u8> =
+    b"MEMEFI is a community-driven token powering the MemeFi consumer ecosystem.";
 const ICON_URL: vector<u8> = b"https://memefi.club/image.svg"; // TODO: Update coin image
 const TOTAL_SUPPLY: u64 = 10_000_000_000;
 
