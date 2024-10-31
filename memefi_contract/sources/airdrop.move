@@ -13,17 +13,17 @@
 module memefi::airdrop;
 
 use memefi::roles::{Self, Roles, AdminRole};
-use memefi::safe::Safe;
+use memefi::safe::{Safe, TokenConfig};
 use std::string::String;
 use sui::coin;
 use sui::event;
 use sui::package::{Self, Publisher};
 use sui::table::{Self, Table};
 
-/// The maximum number of tokens that can be sent in one PTB.
-const MAX_TOKEN_LIMIT: u64 = 50_000;
-
+/// Cannot airdrop twice to a user.
 const EAlreadyAirdropped: u64 = 0;
+
+/// Tries to send tokens with value bigger than the allowed limit in a PTB.
 const ETokenLimitExceeded: u64 = 1;
 
 /// [Shared] AirdropRegistry is a shared object that manages roles and maintains a
@@ -32,12 +32,6 @@ public struct AirdropRegistry has key {
     id: UID,
     roles: Roles,
     record: Table<String, bool>,
-}
-
-/// Helper configuration object for managing token limits in a transaction (PTB).
-public struct AirdropConfig has drop {
-    max_token_limit: u64,
-    current_token_sent: u64,
 }
 
 /// AirdropEvent is emitted when tokens are airdropped to an address.
@@ -70,15 +64,6 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
 
 // === Public functions ===
 
-/// Creates a temporary `AirdropConfig` with a maximum token limit for the PTB.
-/// This struct is used to keep track of the total tokens sent during the PTB.
-public fun create_airdrop_config(_ctx: &mut TxContext): AirdropConfig {
-    AirdropConfig {
-        max_token_limit: MAX_TOKEN_LIMIT,
-        current_token_sent: 0,
-    }
-}
-
 /// Airdrops a specified value of tokens to a user and adds the user's ID to the record.
 /// The sender must have the `AdminRole` to execute the airdrop.
 /// Aborts with `sui::balance::ENotEnough` if `value > coin` value.
@@ -88,7 +73,7 @@ public fun send_token<T>(
     user_id: String,
     user_addr: address,
     registry: &mut AirdropRegistry,
-    config: &mut AirdropConfig,
+    config: &mut TokenConfig,
     ctx: &mut TxContext,
 ) {
     // Ensure the sender is authorized with `AdminRole`.
@@ -98,8 +83,11 @@ public fun send_token<T>(
     assert!(registry.is_airdropped(user_id) == false, EAlreadyAirdropped);
 
     // Accumulate token amount in config and check max limit.
-    config.current_token_sent = config.current_token_sent + value;
-    assert!(config.current_token_sent <= config.max_token_limit, ETokenLimitExceeded);
+    config.update_token_config_amount(value);
+    assert!(
+        config.token_config_amount() <= config.token_config_max_limit(),
+        ETokenLimitExceeded,
+    );
 
     // Withdraw the required balance from the Safe and create a new `Coin<T>`.
     let airdrop_coin = coin::take<T>(self.balance_mut<T>(), value, ctx);

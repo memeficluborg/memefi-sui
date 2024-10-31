@@ -15,11 +15,23 @@ use sui::balance::{Self, Balance};
 use sui::coin::Coin;
 use sui::package::Publisher;
 
+/// The maximum number of tokens that can be sent in one PTB.
+const MAX_TOKEN_LIMIT: u64 = 50_000;
+
+/// Tries to take a token of value bigger than the allowed limit in a PTB.
+const ETokenLimitExceeded: u64 = 0;
+
 /// [Shared] Safe for holding a `Balance<T>` with controlled access.
 public struct Safe<phantom T> has key {
     id: UID,
     roles: Roles,
     balance: Balance<T>,
+}
+
+/// Helper configuration object for managing token limits in a transaction (PTB).
+public struct TokenConfig has drop {
+    max_token_limit: u64,
+    tokens: u64,
 }
 
 /// Initializes a Safe to hold MEMEFI balance and assigns the sender as the initial admin
@@ -52,9 +64,22 @@ public fun put<T: drop>(self: &mut Safe<T>, coin: Coin<T>, ctx: &mut TxContext) 
 
 /// Take a `Coin` worth of `value` from `Safe` balance.
 /// The sender must be authorised with the `SafeManagerRole`.
-public fun take<T: drop>(self: &mut Safe<T>, value: u64, ctx: &mut TxContext): Coin<T> {
+public fun take<T: drop>(
+    self: &mut Safe<T>,
+    value: u64,
+    config: &mut TokenConfig,
+    ctx: &mut TxContext,
+): Coin<T> {
     // Ensure the sender is authorized with `SafeManagerRole`.
     self.roles().assert_has_role<SafeManagerRole>(ctx.sender());
+
+    // Accumulate token amount in config and check max limit.
+    config.update_token_config_amount(value);
+    assert!(
+        config.token_config_amount() <= config.token_config_max_limit(),
+        ETokenLimitExceeded,
+    );
+
     self.balance.split(value).into_coin(ctx)
 }
 
@@ -116,6 +141,25 @@ public fun deauthorize_manager<T>(
     self.roles_mut().deauthorize(roles::new_role<SafeManagerRole>(addr));
 }
 
+// === Token limit management ===
+
+/// Creates a temporary `TokenConfig` with a maximum token limit for the PTB.
+/// This struct is used to keep track of the total tokens taken during the PTB.
+public fun get_token_config(_ctx: &mut TxContext): TokenConfig {
+    TokenConfig {
+        max_token_limit: MAX_TOKEN_LIMIT,
+        tokens: 0,
+    }
+}
+
+public fun token_config_amount(self: &TokenConfig): u64 {
+    self.tokens
+}
+
+public fun token_config_max_limit(self: &TokenConfig): u64 {
+    self.max_token_limit
+}
+
 #[allow(lint(share_owned))]
 public fun share<T>(self: Safe<T>) {
     transfer::share_object(self)
@@ -166,6 +210,11 @@ public(package) fun roles<T>(self: &Safe<T>): &Roles {
 /// Returns a mutable reference to the `Safe` Balance for internal modifications.
 public(package) fun balance_mut<T>(self: &mut Safe<T>): &mut Balance<T> {
     &mut self.balance
+}
+
+/// Updates the tokens value in hot potato.
+public(package) fun update_token_config_amount(self: &mut TokenConfig, value: u64) {
+    self.tokens = self.tokens + value
 }
 
 #[test_only]

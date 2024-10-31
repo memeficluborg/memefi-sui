@@ -48,7 +48,8 @@ fun test_take() {
 
     // Take some of the balance out.
     ts::next_tx(&mut ts, @0x2);
-    let takeout_coin = safe.take<TEST_MEMEFI>(5_000, ts.ctx());
+    let mut token_config = safe::get_token_config(ts.ctx());
+    let takeout_coin = safe.take<TEST_MEMEFI>(5_000, &mut token_config, ts.ctx());
 
     // Verify the withdrawn amount and remaining balance.
     assert!(takeout_coin.value() == 5_000);
