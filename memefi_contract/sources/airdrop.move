@@ -1,3 +1,15 @@
+/// This module handles controlled token airdrops for MEMEFI.
+/// It allows a designated administrator to distribute tokens to selected users, recording
+/// airdropped users in an internal registry record to prevent duplicate distributions.
+///
+/// Key Components:
+/// - AirdropRegistry: A shared object managing authorized roles and maintaining a
+///   record of users who have already received an airdrop. The registry restricts
+/// multiple
+///   airdrops to the same user and stores administrator roles with flexible
+/// configuration.
+/// - Roles: The module leverages a role-based system to ensure that only authorized
+///   administrators can perform airdrop operations.
 module memefi::airdrop;
 
 use memefi::roles::{Self, Roles, AdminRole};
@@ -11,11 +23,11 @@ use sui::table::{Self, Table};
 const EAlreadyAirdropped: u64 = 0;
 
 /// [Shared] AirdropRegistry is a shared object that manages roles and maintains a
-/// denylist for airdrop actions.
+/// record for airdrop actions.
 public struct AirdropRegistry has key {
     id: UID,
     roles: Roles,
-    denylist: Table<String, bool>,
+    record: Table<String, bool>,
 }
 
 /// [Helper] An empty struct to mock custom configurations per role.
@@ -31,8 +43,8 @@ public struct AirdropEvent<phantom T> has copy, drop {
 // Define a OTW for claiming the `Publisher` object.
 public struct AIRDROP has drop {}
 
-/// Initializes the AirdropRegistry and assigns the sender as the initial admin and
-/// freezer. The registry is shared on the network for further actions.
+/// Initializes the AirdropRegistry and assigns the sender as the initial admin.
+/// The registry is shared on the network for further actions.
 fun init(otw: AIRDROP, ctx: &mut TxContext) {
     package::claim_and_keep(otw, ctx);
 
@@ -40,7 +52,7 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
     let mut airdrop_registry = AirdropRegistry {
         id: object::new(ctx),
         roles: roles::new(ctx),
-        denylist: table::new(ctx),
+        record: table::new(ctx),
     };
 
     // Authorize the sender as the first admin of the `AirdropRegistry`.
@@ -51,10 +63,10 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
 
 // === Public functions ===
 
-/// Airdrops a specified value of tokens to a user and adds the user's ID to the denylist.
+/// Airdrops a specified value of tokens to a user and adds the user's ID to the record.
 /// The sender must have the `AdminRole` to execute the airdrop.
 /// Aborts with `sui::balance::ENotEnough` if `value > coin` value.
-public fun new<T>(
+public fun send_token<T>(
     self: &mut Safe<T>,
     value: u64,
     user_id: String,
@@ -66,14 +78,14 @@ public fun new<T>(
     registry.roles().assert_has_role<AdminRole>(ctx.sender());
 
     // Ensure the user has not been airdropped already.
-    assert_is_not_airdropped(registry, user_id);
+    assert!(registry.is_airdropped(user_id) == false, EAlreadyAirdropped);
 
     // Withdraw the required balance from the Safe and create a new `Coin<T>`.
     let airdrop_coin = coin::take<T>(self.balance_mut<T>(), value, ctx);
     event::emit(AirdropEvent<T> { addr: user_addr, value: airdrop_coin.value() });
 
-    // Add the user's ID in the denylist.
-    registry.denylist_add(user_id, ctx);
+    // Add the user's ID in the record.
+    registry.add_record(user_id, ctx);
 
     // Transfer the coin to the specified address.
     transfer::public_transfer(airdrop_coin, user_addr);
@@ -105,24 +117,22 @@ public fun deauthorize_admin(
 
 // === Internal functions ===
 
-/// [Internal] Adds a user_id to the `AirdropRegistry` denylist.
-/// This function is for internal use and does not check for `FreezerRole`.
-public(package) fun denylist_add(
+/// [Internal] Adds a user_id to the `AirdropRegistry` record.
+public(package) fun add_record(
     self: &mut AirdropRegistry,
     user_id: String,
     _ctx: &mut TxContext,
 ) {
-    table::add(&mut self.denylist, user_id, true);
+    self.record.add(user_id, true);
 }
 
-/// [Internal] Removes a user_id from the `AirdropRegistry` denylist.
-/// This function is for internal use and does not check for `FreezerRole`.
-public(package) fun denylist_remove(
+/// [Internal] Removes a user_id from the `AirdropRegistry` record.
+public(package) fun remove_record(
     self: &mut AirdropRegistry,
     user_id: String,
     _ctx: &mut TxContext,
 ) {
-    table::remove(&mut self.denylist, user_id);
+    self.record.remove(user_id);
 }
 
 /// Returns a mutable reference to the `AirdropRegistry` Roles for internal modifications.
@@ -135,16 +145,12 @@ public(package) fun roles(self: &AirdropRegistry): &Roles {
     &self.roles
 }
 
-public(package) fun assert_is_not_airdropped(self: &AirdropRegistry, user_id: String) {
-    assert!(self.is_airdropped(user_id) == false, EAlreadyAirdropped);
-}
-
 // === Accessors ===
 
-/// Checks if a user_id is present in the `AirdropRegistry` denylist.
+/// Checks if a user_id is present in the `AirdropRegistry` record.
 /// Returns `true` if the user_id is found, otherwise `false`.
 public fun is_airdropped(self: &AirdropRegistry, user_id: String): bool {
-    table::contains(&self.denylist, user_id)
+    self.record.contains(user_id)
 }
 
 #[test_only]

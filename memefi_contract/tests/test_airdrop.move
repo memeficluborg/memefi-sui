@@ -53,7 +53,7 @@ fun test_new_airdrop() {
     let safe = ts::take_shared<Safe<TEST_MEMEFI>>(&ts);
     assert!(safe.balance<TEST_MEMEFI>() == TOTAL_SUPPLY - AIRDROP_AMOUNT);
 
-    // Check that user is in denylist after getting the airdrop.
+    // Check that user is recorded after getting the airdrop.
     ts::next_tx(&mut ts, @0x2);
     let registry = ts::take_shared<AirdropRegistry>(&ts);
     assert!(airdrop::is_airdropped(&registry, string::utf8(USER_ID)));
@@ -72,7 +72,7 @@ fun airdrop_twice() {
     let mut safe = ts::take_shared<Safe<TEST_MEMEFI>>(&ts);
     let mut registry = ts::take_shared<AirdropRegistry>(&ts);
 
-    airdrop::new(
+    airdrop::send_token(
         &mut safe,
         AIRDROP_AMOUNT,
         string::utf8(USER_ID),
@@ -109,7 +109,7 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address) {
     ts::next_tx(ts, admin);
     let mut registry = ts::take_shared<AirdropRegistry>(ts);
 
-    airdrop::new(
+    airdrop::send_token(
         &mut safe,
         AIRDROP_AMOUNT,
         string::utf8(USER_ID),
