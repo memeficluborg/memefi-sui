@@ -1,7 +1,7 @@
 module memefi::test_roles;
 
 use memefi::airdrop::{Self, AirdropRegistry};
-use memefi::roles::{Self, AdminRole};
+use memefi::roles::{Self, ApiRole};
 use sui::package::Publisher;
 use sui::test_scenario as ts;
 
@@ -10,8 +10,8 @@ fun authorize_twice() {
     let mut ctx = tx_context::dummy();
     let mut roles = roles::new(&mut ctx);
 
-    roles.authorize(roles::new_role<AdminRole>(@0x2));
-    roles.authorize(roles::new_role<AdminRole>(@0x2));
+    roles.authorize(roles::new_role<ApiRole>(@0x2));
+    roles.authorize(roles::new_role<ApiRole>(@0x2));
 
     abort 0
 }
@@ -21,13 +21,13 @@ fun deauthorize_non_existing() {
     let mut ctx = tx_context::dummy();
     let mut roles = roles::new(&mut ctx);
 
-    roles.deauthorize<_>(roles::new_role<AdminRole>(@0x2));
+    roles.deauthorize<_>(roles::new_role<ApiRole>(@0x2));
 
     abort 0
 }
 
 #[test]
-fun publisher_authorizes_new_admin() {
+fun publisher_authorizes_new_api() {
     let mut ts = ts::begin(@0x2);
     airdrop::test_init(ts.ctx());
 
@@ -35,10 +35,10 @@ fun publisher_authorizes_new_admin() {
     let publisher = ts::take_from_sender<Publisher>(&ts);
     let mut registry = ts::take_shared<AirdropRegistry>(&ts);
 
-    airdrop::authorize_admin(&mut registry, &publisher, @0x5, ts.ctx());
+    airdrop::authorize_api(&mut registry, &publisher, @0x5, ts.ctx());
 
     ts::next_tx(&mut ts, @0x2);
-    assert!(registry.roles().is_authorized<AdminRole>(@0x5));
+    assert!(registry.roles().is_authorized<ApiRole>(@0x5));
 
     ts::return_shared(registry);
     ts::return_to_sender(&ts, publisher);
@@ -46,7 +46,7 @@ fun publisher_authorizes_new_admin() {
 }
 
 #[test]
-fun publisher_deauthorizes_any_admin() {
+fun publisher_deauthorizes_api() {
     let mut ts = ts::begin(@0x2);
     airdrop::test_init(ts.ctx());
 
@@ -54,14 +54,14 @@ fun publisher_deauthorizes_any_admin() {
     let publisher = ts::take_from_sender<Publisher>(&ts);
     let mut registry = ts::take_shared<AirdropRegistry>(&ts);
 
-    airdrop::authorize_admin(&mut registry, &publisher, @0x5, ts.ctx());
+    airdrop::authorize_api(&mut registry, &publisher, @0x5, ts.ctx());
 
     ts::next_tx(&mut ts, @0x2);
-    assert!(registry.roles().is_authorized<AdminRole>(@0x5));
+    assert!(registry.roles().is_authorized<ApiRole>(@0x5));
 
     ts::next_tx(&mut ts, @0x2);
-    airdrop::deauthorize_admin(&mut registry, &publisher, @0x5, ts.ctx());
-    assert!(!registry.roles().is_authorized<AdminRole>(@0x5));
+    airdrop::deauthorize_api(&mut registry, &publisher, @0x5, ts.ctx());
+    assert!(!registry.roles().is_authorized<ApiRole>(@0x5));
 
     ts::return_shared(registry);
     ts::return_to_sender(&ts, publisher);

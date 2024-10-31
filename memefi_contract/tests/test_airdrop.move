@@ -1,13 +1,13 @@
 module memefi::test_airdrop;
 
-use memefi::airdrop::{Self, AirdropRegistry};
-use memefi::roles::AdminRole;
-use memefi::safe::{Self, Safe, TokenConfig};
+use memefi::airdrop::{Self, AirdropRegistry, AirdropConfig};
+use memefi::safe::Safe;
 use memefi::test_memefi::{Self, TEST_MEMEFI};
 use memefi::test_safe;
 use memefi::treasury;
 use std::string;
 use sui::coin::{Self, Coin};
+use sui::package::Publisher;
 use sui::test_scenario::{Self as ts, Scenario};
 use sui::test_utils;
 
@@ -16,6 +16,8 @@ const AIRDROP_AMOUNT: u64 = 1_000;
 const USER_ID: vector<u8> = b"123userID";
 const USER_ADDR: address = @0x3;
 
+const ECannotAirdrop: u64 = 0;
+
 #[test]
 fun test_airdrop_registry_initialization() {
     let mut ctx = tx_context::dummy();
@@ -23,24 +25,37 @@ fun test_airdrop_registry_initialization() {
 }
 
 #[test]
-fun test_admin_is_authorized_in_airdrop_registry() {
+fun test_new_airdrop() {
     let mut ts = ts::begin(@0x2);
-    airdrop::test_init(ts.ctx());
+    let airdrop_config = test_create_airdrop(&mut ts, @0x2);
 
+    // Check that user actually received a token with value equal to AIRDROP_AMOUNT.
+    ts::next_tx(&mut ts, USER_ADDR);
+    let user_coin = ts::take_from_sender<Coin<TEST_MEMEFI>>(&ts);
+    assert!(user_coin.value() == AIRDROP_AMOUNT);
+    ts::return_to_sender(&ts, user_coin);
+
+    // Check that Safe's balance is (TOTAL_SUPPLY - AIRDROP_AMOUNT)
     ts::next_tx(&mut ts, @0x2);
-    let registry = ts::take_shared<AirdropRegistry>(&ts);
+    let safe = ts::take_shared<Safe<TEST_MEMEFI>>(&ts);
+    assert!(safe.balance<TEST_MEMEFI>() == TOTAL_SUPPLY - AIRDROP_AMOUNT);
 
-    // Verify that @0x2 is an admin and a freezer
-    assert!(registry.roles().is_authorized<AdminRole>(@0x2));
+    // Check that user is recorded after getting the airdrop.
+    ts::next_tx(&mut ts, @0x2);
+    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
+    assert!(airdrop::is_airdropped(&registry, string::utf8(USER_ID)));
 
-    test_utils::destroy(registry);
+    airdrop::finalize_send(&mut registry, airdrop_config, ts.ctx());
+
+    ts::return_shared(registry);
+    ts::return_shared(safe);
     ts::end(ts);
 }
 
-#[test]
-fun test_new_airdrop() {
+#[test, expected_failure(abort_code = ECannotAirdrop)]
+fun test_new_airdrop_without_finalize() {
     let mut ts = ts::begin(@0x2);
-    test_create_airdrop(&mut ts, @0x2);
+    let _airdrop_config = test_create_airdrop(&mut ts, @0x2);
 
     // Check that user actually received a token with value equal to AIRDROP_AMOUNT.
     ts::next_tx(&mut ts, USER_ADDR);
@@ -58,9 +73,7 @@ fun test_new_airdrop() {
     let registry = ts::take_shared<AirdropRegistry>(&ts);
     assert!(airdrop::is_airdropped(&registry, string::utf8(USER_ID)));
 
-    ts::return_shared(registry);
-    ts::return_shared(safe);
-    ts::end(ts);
+    abort 0
 }
 
 #[test, expected_failure(abort_code = ::memefi::airdrop::EAlreadyAirdropped)]
@@ -82,19 +95,22 @@ fun airdrop_twice() {
         ts.ctx(),
     );
 
+    airdrop::finalize_send(&mut registry, airdrop_config, ts.ctx());
+
     ts::return_shared(registry);
     ts::return_shared(safe);
     ts::end(ts);
 }
 
 #[test_only]
-public fun test_create_airdrop(ts: &mut Scenario, admin: address): TokenConfig {
+public fun test_create_airdrop(ts: &mut Scenario, admin: address): AirdropConfig {
     ts::next_tx(ts, admin);
     let mut treasury_cap = test_memefi::create_test_treasury(ts.ctx());
     airdrop::test_init(ts.ctx());
 
     ts::next_tx(ts, admin);
-    test_safe::create_test_safe_with_admin<TEST_MEMEFI>(ts, admin);
+    test_safe::create_test_safe<TEST_MEMEFI>(ts, admin);
+    let publisher = ts::take_from_sender<Publisher>(ts);
 
     // Mint the total supply of `MEMEFI` tokens and send the whole supply to admin.
     ts::next_tx(ts, admin);
@@ -103,13 +119,16 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address): TokenConfig {
 
     ts::next_tx(ts, admin);
     let mut safe = ts::take_shared<Safe<TEST_MEMEFI>>(ts);
-    safe.put<TEST_MEMEFI>(coin, ts.ctx());
+    safe.put<TEST_MEMEFI>(coin, &publisher);
 
     let wrapped_treasury = treasury::wrap(treasury_cap, ts.ctx());
 
     ts::next_tx(ts, admin);
     let mut registry = ts::take_shared<AirdropRegistry>(ts);
-    let mut token_config = safe::get_token_config(ts.ctx());
+    airdrop::authorize_api(&mut registry, &publisher, admin, ts.ctx());
+
+    ts::next_tx(ts, admin);
+    let mut airdrop_config = airdrop::init_send(&mut registry, ts.ctx());
 
     airdrop::send_token(
         &mut safe,
@@ -117,14 +136,15 @@ public fun test_create_airdrop(ts: &mut Scenario, admin: address): TokenConfig {
         string::utf8(USER_ID),
         USER_ADDR,
         &mut registry,
-        &mut token_config,
+        &mut airdrop_config,
         ts.ctx(),
     );
 
     ts::next_tx(ts, admin);
     ts::return_shared(registry);
+    ts::return_to_sender(ts, publisher);
     test_utils::destroy(wrapped_treasury);
     ts::return_shared(safe);
 
-    token_config
+    airdrop_config
 }
