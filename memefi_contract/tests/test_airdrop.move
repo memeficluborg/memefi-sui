@@ -1,14 +1,13 @@
 module memefi::test_airdrop;
 
 use memefi::airdrop::{Self, AirdropRegistry};
-use memefi::roles::{AdminRole, FreezerRole};
+use memefi::roles::AdminRole;
 use memefi::safe::Safe;
 use memefi::test_memefi::{Self, TEST_MEMEFI};
 use memefi::test_safe;
 use memefi::treasury;
 use std::string;
 use sui::coin::{Self, Coin};
-use sui::package::Publisher;
 use sui::test_scenario::{Self as ts, Scenario};
 use sui::test_utils;
 
@@ -33,7 +32,6 @@ fun test_admin_is_authorized_in_airdrop_registry() {
 
     // Verify that @0x2 is an admin and a freezer
     assert!(registry.roles().is_authorized<AdminRole>(@0x2));
-    assert!(registry.roles().is_authorized<FreezerRole>(@0x2));
 
     test_utils::destroy(registry);
     ts::end(ts);
@@ -85,100 +83,6 @@ fun airdrop_twice() {
 
     ts::return_shared(registry);
     ts::return_shared(safe);
-    ts::end(ts);
-}
-
-#[test]
-fun test_freeze() {
-    let mut ts = ts::begin(@0x2);
-    airdrop::test_init(ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
-    airdrop::freeze_user(&mut registry, string::utf8(USER_ID), ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    assert!(airdrop::is_airdropped(&registry, string::utf8(USER_ID)));
-
-    ts::return_shared(registry);
-    ts::end(ts);
-}
-
-#[test, expected_failure(abort_code = ::sui::dynamic_field::EFieldAlreadyExists)]
-fun test_freeze_twice() {
-    let mut ts = ts::begin(@0x2);
-    airdrop::test_init(ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
-    airdrop::freeze_user(&mut registry, string::utf8(USER_ID), ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    airdrop::freeze_user(&mut registry, string::utf8(USER_ID), ts.ctx());
-
-    ts::return_shared(registry);
-    ts::end(ts);
-}
-
-#[test]
-fun test_freeze_unfreeze() {
-    let mut ts = ts::begin(@0x2);
-    airdrop::test_init(ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
-    airdrop::freeze_user(&mut registry, string::utf8(USER_ID), ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    assert!(airdrop::is_airdropped(&registry, string::utf8(USER_ID)));
-
-    ts::next_tx(&mut ts, @0x2);
-    airdrop::unfreeze_user(&mut registry, string::utf8(USER_ID), ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    assert!(!airdrop::is_airdropped(&registry, string::utf8(USER_ID)));
-
-    ts::return_shared(registry);
-    ts::end(ts);
-}
-
-#[test]
-fun test_freezer_role_can_freeze() {
-    let mut ts = ts::begin(@0x2);
-    airdrop::test_init(ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    let publisher = ts::take_from_sender<Publisher>(&ts);
-    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
-
-    airdrop::authorize_freezer(&publisher, &mut registry, @0x5, ts.ctx());
-
-    ts::next_tx(&mut ts, @0x5);
-    airdrop::freeze_user(&mut registry, string::utf8(USER_ID), ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    ts::return_shared(registry);
-    ts::return_to_sender(&ts, publisher);
-    ts::end(ts);
-}
-
-#[test, expected_failure(abort_code = ::memefi::roles::EUnauthorizedUser)]
-fun test_non_freezer_role_cannot_freeze() {
-    let mut ts = ts::begin(@0x2);
-    airdrop::test_init(ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    let publisher = ts::take_from_sender<Publisher>(&ts);
-    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
-
-    airdrop::authorize_admin(&publisher, &mut registry, @0x5, ts.ctx());
-
-    ts::next_tx(&mut ts, @0x5);
-    airdrop::freeze_user(&mut registry, string::utf8(USER_ID), ts.ctx());
-
-    ts::next_tx(&mut ts, @0x2);
-    ts::return_shared(registry);
-    ts::return_to_sender(&ts, publisher);
     ts::end(ts);
 }
 

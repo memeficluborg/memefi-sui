@@ -31,18 +31,12 @@ fun init(ctx: &mut TxContext) {
     // Authorize the sender as the first admin of the safe.
     memefi_safe
         .roles_mut()
-        .authorize<AdminRole, _>(
-            roles::new_role<AdminRole>(ctx.sender()),
-            true,
-        );
+        .authorize<AdminRole>(roles::new_role<AdminRole>(ctx.sender()));
 
     // Authorize the sender as the initial safe manager.
     memefi_safe
         .roles_mut()
-        .authorize<SafeManagerRole, _>(
-            roles::new_role<SafeManagerRole>(ctx.sender()),
-            true,
-        );
+        .authorize<SafeManagerRole>(roles::new_role<SafeManagerRole>(ctx.sender()));
 
     transfer::share_object(memefi_safe);
 }
@@ -53,7 +47,7 @@ fun init(ctx: &mut TxContext) {
 /// The sender must have the `SafeManagerRole`.
 public fun put<T: drop>(self: &mut Safe<T>, coin: Coin<T>, ctx: &mut TxContext) {
     // Ensure the sender is authorized with `SafeManagerRole`.
-    self.roles().assert_is_authorized<SafeManagerRole>(ctx.sender());
+    self.roles().assert_has_role<SafeManagerRole>(ctx.sender());
 
     coin::put<T>(&mut self.balance, coin);
 }
@@ -62,7 +56,7 @@ public fun put<T: drop>(self: &mut Safe<T>, coin: Coin<T>, ctx: &mut TxContext) 
 /// The sender must be authorised with the `SafeManagerRole`.
 public fun take<T: drop>(self: &mut Safe<T>, value: u64, ctx: &mut TxContext): Coin<T> {
     // Ensure the sender is authorized with `SafeManagerRole`.
-    self.roles().assert_is_authorized<SafeManagerRole>(ctx.sender());
+    self.roles().assert_has_role<SafeManagerRole>(ctx.sender());
 
     // Abort if the value is greater than the allowed `MAX_TOKEN_LIMIT`.
     assert!(value <= MAX_TOKEN_LIMIT, EWithdrawNotAllowed);
@@ -75,7 +69,7 @@ public fun take<T: drop>(self: &mut Safe<T>, value: u64, ctx: &mut TxContext): C
 /// This is for extreme cases where the funds need to return to the treasury address.
 public fun withdraw<T: drop>(self: &mut Safe<T>, ctx: &mut TxContext): Coin<T> {
     // Ensure the sender is authorized with `AdminRole`.
-    self.roles().assert_is_authorized<AdminRole>(ctx.sender());
+    self.roles().assert_has_role<AdminRole>(ctx.sender());
 
     // Withdraw all balance and wrap it into a coin.
     let safe_balance = self.balance.withdraw_all();
@@ -93,12 +87,7 @@ public fun authorize_admin<T>(
 ) {
     assert!(pub.from_package<AdminRole>(), EWrongPublisher);
 
-    safe
-        .roles_mut()
-        .authorize<AdminRole, _>(
-            roles::new_role<AdminRole>(addr),
-            true,
-        );
+    safe.roles_mut().authorize<AdminRole>(roles::new_role<AdminRole>(addr));
 }
 
 /// Publisher can authorize an address with the `AdminRole` in the `Safe<T>`.
@@ -110,11 +99,7 @@ public fun deauthorize_admin<T>(
 ) {
     assert!(pub.from_package<AdminRole>(), EWrongPublisher);
 
-    safe
-        .roles_mut()
-        .deauthorize<AdminRole, bool>(
-            roles::new_role<AdminRole>(addr),
-        );
+    safe.roles_mut().deauthorize<AdminRole>(roles::new_role<AdminRole>(addr));
 }
 
 /// Publisher can authorize an address with the `SafeManagerRole` in the `Safe<T>`.
@@ -126,12 +111,7 @@ public fun authorize_manager<T>(
 ) {
     assert!(pub.from_package<SafeManagerRole>(), EWrongPublisher);
 
-    safe
-        .roles_mut()
-        .authorize<SafeManagerRole, _>(
-            roles::new_role<SafeManagerRole>(addr),
-            true,
-        );
+    safe.roles_mut().authorize<SafeManagerRole>(roles::new_role<SafeManagerRole>(addr));
 }
 
 /// Publisher can authorize an address with the `SafeManagerRole` in the
@@ -144,11 +124,7 @@ public fun deauthorize_manager<T>(
 ) {
     assert!(pub.from_package<SafeManagerRole>(), EWrongPublisher);
 
-    safe
-        .roles_mut()
-        .deauthorize<SafeManagerRole, bool>(
-            roles::new_role<SafeManagerRole>(addr),
-        );
+    safe.roles_mut().deauthorize<SafeManagerRole>(roles::new_role<SafeManagerRole>(addr));
 }
 
 #[allow(lint(share_owned))]

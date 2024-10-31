@@ -1,6 +1,6 @@
 module memefi::airdrop;
 
-use memefi::roles::{Self, Roles, AdminRole, FreezerRole};
+use memefi::roles::{Self, Roles, AdminRole};
 use memefi::safe::Safe;
 use std::string::String;
 use sui::coin;
@@ -47,17 +47,8 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
     // Authorize the sender as the first admin of the `AirdropRegistry`.
     airdrop_registry
         .roles_mut()
-        .authorize<AdminRole, _>(
+        .authorize<AdminRole>(
             roles::new_role<AdminRole>(ctx.sender()),
-            true,
-        );
-
-    // Authorize the sender to add users to the `AirdropRegistry` denylist.
-    airdrop_registry
-        .roles_mut()
-        .authorize<FreezerRole, _>(
-            roles::new_role<FreezerRole>(ctx.sender()),
-            true,
         );
 
     transfer::share_object(airdrop_registry);
@@ -77,7 +68,7 @@ public fun new<T>(
     ctx: &mut TxContext,
 ) {
     // Ensure the sender is authorized with `AdminRole`.
-    registry.roles().assert_is_authorized<AdminRole>(ctx.sender());
+    registry.roles().assert_has_role<AdminRole>(ctx.sender());
 
     // Ensure the user has not been airdropped already.
     assert_is_not_airdropped(registry, user_id);
@@ -93,26 +84,6 @@ public fun new<T>(
     transfer::public_transfer(airdrop_coin, user_addr);
 }
 
-/// Adds a user to the `AirdropRegistry` denylist, preventing them from receiving
-/// future airdrops.
-/// The sender must have the `FreezerRole`.
-public fun freeze_user(self: &mut AirdropRegistry, user_id: String, ctx: &mut TxContext) {
-    self.roles().assert_is_authorized<FreezerRole>(ctx.sender());
-    self.denylist_add(user_id, ctx);
-}
-
-/// Removes a user from the `AirdropRegistry` denylist, allowing them to receive
-/// future airdrops.
-/// The sender must have the `FreezerRole`.
-public fun unfreeze_user(
-    self: &mut AirdropRegistry,
-    user_id: String,
-    ctx: &mut TxContext,
-) {
-    self.roles().assert_is_authorized<FreezerRole>(ctx.sender());
-    self.denylist_remove(user_id, ctx);
-}
-
 // --- Authorize / Deauthorize Role functions ---
 
 /// Publisher can authorize an address with the `AdminRole` in the `AirdropRegistry`.
@@ -124,12 +95,7 @@ public fun authorize_admin(
 ) {
     assert!(pub.from_package<AdminRole>(), EWrongPublisher);
 
-    registry
-        .roles_mut()
-        .authorize<AdminRole, _>(
-            roles::new_role<AdminRole>(addr),
-            true,
-        );
+    registry.roles_mut().authorize<AdminRole>(roles::new_role<AdminRole>(addr));
 }
 
 /// Publisher can authorize an address with the `AdminRole` in the `AirdropRegistry`.
@@ -141,44 +107,7 @@ public fun deauthorize_admin(
 ) {
     assert!(pub.from_package<AdminRole>(), EWrongPublisher);
 
-    registry
-        .roles_mut()
-        .deauthorize<AdminRole, bool>(
-            roles::new_role<AdminRole>(addr),
-        );
-}
-
-/// Publisher can authorize an address with the `FreezerRole` in the `AirdropRegistry`.
-public fun authorize_freezer(
-    pub: &Publisher,
-    registry: &mut AirdropRegistry,
-    addr: address,
-    _ctx: &mut TxContext,
-) {
-    assert!(pub.from_package<FreezerRole>(), EWrongPublisher);
-
-    registry
-        .roles_mut()
-        .authorize<FreezerRole, _>(
-            roles::new_role<FreezerRole>(addr),
-            true,
-        );
-}
-
-/// Publisher can deauthorize an address with the `FreezerRole` in the `AirdropRegistry`.
-public fun deauthorize_freezer(
-    pub: &Publisher,
-    registry: &mut AirdropRegistry,
-    addr: address,
-    _ctx: &mut TxContext,
-) {
-    assert!(pub.from_package<FreezerRole>(), EWrongPublisher);
-
-    registry
-        .roles_mut()
-        .deauthorize<FreezerRole, bool>(
-            roles::new_role<FreezerRole>(addr),
-        );
+    registry.roles_mut().deauthorize<AdminRole>(roles::new_role<AdminRole>(addr));
 }
 
 // === Internal functions ===

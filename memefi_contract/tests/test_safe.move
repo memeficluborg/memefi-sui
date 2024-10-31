@@ -114,14 +114,9 @@ fun test_delete_safe() {
     // Deauthorize the roles to make the bag empty.
     safe
         .roles_mut()
-        .deauthorize<SafeManagerRole, bool>(
-            memefi::roles::new_role<SafeManagerRole>(@0x2),
-        );
-    safe
-        .roles_mut()
-        .deauthorize<AdminRole, bool>(
-            memefi::roles::new_role<AdminRole>(@0x2),
-        );
+        .deauthorize<SafeManagerRole>(memefi::roles::new_role<SafeManagerRole>(@0x2));
+
+    safe.roles_mut().deauthorize<AdminRole>(memefi::roles::new_role<AdminRole>(@0x2));
 
     // Delete the safe.
     safe.delete(ts.ctx());
@@ -134,19 +129,9 @@ public(package) fun create_test_safe_with_admin<T>(ts: &mut Scenario, admin: add
     ts::next_tx(ts, admin);
     let mut safe = safe::new<T>(ts.ctx());
 
-    safe
-        .roles_mut()
-        .authorize<AdminRole, _>(
-            roles::new_role<AdminRole>(admin),
-            true,
-        );
+    safe.roles_mut().authorize<AdminRole>(roles::new_role<AdminRole>(admin));
 
-    safe
-        .roles_mut()
-        .authorize<SafeManagerRole, _>(
-            roles::new_role<SafeManagerRole>(admin),
-            true,
-        );
+    safe.roles_mut().authorize<SafeManagerRole>(roles::new_role<SafeManagerRole>(admin));
 
     safe.share();
 }
