@@ -11,6 +11,7 @@
 /// managed directly through authorization.
 module memefi::roles;
 
+use memefi::memefi::MEMEFI;
 use std::type_name;
 use sui::bag::{Self, Bag};
 use sui::package::Publisher;
@@ -110,7 +111,7 @@ public(package) fun assert_has_role<R>(roles: &Roles, addr: address) {
 
 /// Asserts that the given `Publisher` is indeed coming from current package.
 public(package) fun assert_publisher_from_package(self: &Publisher) {
-    assert!(self.from_package<AdminRole>(), EWrongPublisher);
+    assert!(self.from_package<MEMEFI>(), EWrongPublisher);
 }
 
 /// Returns the current count of administrators in the system.

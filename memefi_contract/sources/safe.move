@@ -16,7 +16,7 @@ use sui::coin::Coin;
 use sui::package::Publisher;
 
 /// The maximum number of tokens that can be sent in one PTB.
-const MAX_TOKEN_LIMIT: u64 = 5_000_000;
+const MAX_TOKEN_LIMIT: u64 = 10_000_000;
 
 /// Tries to take a token of value bigger than the allowed limit in a PTB.
 const ETokenLimitExceeded: u64 = 0;
