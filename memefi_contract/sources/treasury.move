@@ -1,3 +1,10 @@
+/// This module defines the `WrappedTreasury` and associated functions to manage a
+/// `TreasuryCap` in a secure way. By wrapping the `TreasuryCap` in a shared, immutable
+/// object, this module ensures the total token supply cannot be modified.
+/// The `TreasuryCap` is stored as a Dynamic Object Field (DOF) within the
+/// `WrappedTreasury` object. Using a DOF maintains discoverability and accessibility for
+/// on-chain interactions, allowing functions like `total_supply` to retrieve the current
+/// total token circulation.
 module memefi::treasury;
 
 use sui::coin::TreasuryCap;
@@ -23,7 +30,9 @@ public(package) fun wrap<T>(
     WrappedTreasury { id }
 }
 
-/// Return the total number of tokens in circulation.
+/// Returns the total number of tokens in circulation by accessing the `TreasuryCap`
+/// within the `WrappedTreasury`. This function is read-only and returns the supply
+/// for users and external queries, ensuring transparency around token circulation.
 public fun total_supply<T>(self: &WrappedTreasury<T>): u64 {
     let immut_cap = dof::borrow<TreasuryCapKey, TreasuryCap<T>>(
         &self.id,
