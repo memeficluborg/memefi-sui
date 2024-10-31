@@ -9,7 +9,6 @@ use sui::package::{Self, Publisher};
 use sui::table::{Self, Table};
 
 const EAlreadyAirdropped: u64 = 0;
-const EWrongPublisher: u64 = 1;
 
 /// [Shared] AirdropRegistry is a shared object that manages roles and maintains a
 /// denylist for airdrop actions.
@@ -45,11 +44,7 @@ fun init(otw: AIRDROP, ctx: &mut TxContext) {
     };
 
     // Authorize the sender as the first admin of the `AirdropRegistry`.
-    airdrop_registry
-        .roles_mut()
-        .authorize<AdminRole>(
-            roles::new_role<AdminRole>(ctx.sender()),
-        );
+    airdrop_registry.roles_mut().authorize(roles::new_role<AdminRole>(ctx.sender()));
 
     transfer::share_object(airdrop_registry);
 }
@@ -88,26 +83,24 @@ public fun new<T>(
 
 /// Publisher can authorize an address with the `AdminRole` in the `AirdropRegistry`.
 public fun authorize_admin(
+    self: &mut AirdropRegistry,
     pub: &Publisher,
-    registry: &mut AirdropRegistry,
     addr: address,
     _ctx: &mut TxContext,
 ) {
-    assert!(pub.from_package<AdminRole>(), EWrongPublisher);
-
-    registry.roles_mut().authorize<AdminRole>(roles::new_role<AdminRole>(addr));
+    roles::assert_publisher_from_package(pub);
+    self.roles_mut().authorize(roles::new_role<AdminRole>(addr));
 }
 
 /// Publisher can authorize an address with the `AdminRole` in the `AirdropRegistry`.
 public fun deauthorize_admin(
+    self: &mut AirdropRegistry,
     pub: &Publisher,
-    registry: &mut AirdropRegistry,
     addr: address,
     _ctx: &mut TxContext,
 ) {
-    assert!(pub.from_package<AdminRole>(), EWrongPublisher);
-
-    registry.roles_mut().deauthorize<AdminRole>(roles::new_role<AdminRole>(addr));
+    roles::assert_publisher_from_package(pub);
+    self.roles_mut().deauthorize(roles::new_role<AdminRole>(addr));
 }
 
 // === Internal functions ===

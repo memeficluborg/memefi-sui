@@ -35,7 +35,7 @@ fun publisher_authorizes_new_admin() {
     let publisher = ts::take_from_sender<Publisher>(&ts);
     let mut registry = ts::take_shared<AirdropRegistry>(&ts);
 
-    airdrop::authorize_admin(&publisher, &mut registry, @0x5, ts.ctx());
+    airdrop::authorize_admin(&mut registry, &publisher, @0x5, ts.ctx());
 
     ts::next_tx(&mut ts, @0x2);
     assert!(registry.roles().is_authorized<AdminRole>(@0x5));
@@ -54,13 +54,13 @@ fun publisher_deauthorizes_any_admin() {
     let publisher = ts::take_from_sender<Publisher>(&ts);
     let mut registry = ts::take_shared<AirdropRegistry>(&ts);
 
-    airdrop::authorize_admin(&publisher, &mut registry, @0x5, ts.ctx());
+    airdrop::authorize_admin(&mut registry, &publisher, @0x5, ts.ctx());
 
     ts::next_tx(&mut ts, @0x2);
     assert!(registry.roles().is_authorized<AdminRole>(@0x5));
 
     ts::next_tx(&mut ts, @0x2);
-    airdrop::deauthorize_admin(&publisher, &mut registry, @0x5, ts.ctx());
+    airdrop::deauthorize_admin(&mut registry, &publisher, @0x5, ts.ctx());
     assert!(!registry.roles().is_authorized<AdminRole>(@0x5));
 
     ts::return_shared(registry);

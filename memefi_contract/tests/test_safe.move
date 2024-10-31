@@ -11,9 +11,6 @@ use sui::test_utils;
 /// Total supply of MEMEFI for testing.
 const TOTAL_SUPPLY: u64 = 1_000_000_000;
 
-/// The maximum limit of tokens that can be taken out of the `Safe` in one transaction.
-const MAX_TOKEN_LIMIT: u64 = 50_000;
-
 #[test]
 fun test_safe_init() {
     let mut ts = ts::begin(@0x2);
@@ -56,23 +53,6 @@ fun test_take() {
     // Verify the withdrawn amount and remaining balance.
     assert!(takeout_coin.value() == 5_000);
     assert!(safe.balance() == TOTAL_SUPPLY - 5_000);
-
-    test_utils::destroy(takeout_coin);
-    ts::return_shared(safe);
-    ts::end(ts);
-}
-
-#[test, expected_failure(abort_code = ::memefi::safe::EWithdrawNotAllowed)]
-fun test_take_more_than_allowed() {
-    let mut ts = ts::begin(@0x2);
-    setup_test_safe_with_currency(&mut ts, @0x2);
-
-    ts::next_tx(&mut ts, @0x2);
-    let mut safe = ts::take_shared<Safe<TEST_MEMEFI>>(&ts);
-
-    // Take some of the balance out.
-    ts::next_tx(&mut ts, @0x2);
-    let takeout_coin = safe.take<TEST_MEMEFI>(MAX_TOKEN_LIMIT + 1, ts.ctx());
 
     test_utils::destroy(takeout_coin);
     ts::return_shared(safe);

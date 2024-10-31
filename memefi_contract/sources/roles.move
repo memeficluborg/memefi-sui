@@ -13,6 +13,7 @@ module memefi::roles;
 
 use std::type_name;
 use sui::bag::{Self, Bag};
+use sui::package::Publisher;
 
 /// Tries to remove the last admin.
 const ECannotRemoveLastAdmin: u64 = 1;
@@ -22,6 +23,8 @@ const ERoleAlreadyExists: u64 = 2;
 const EUnauthorizedUser: u64 = 3;
 /// Tries to deauthorize a role that does not exist.
 const ERoleNotExists: u64 = 4;
+/// Publisher is not originating from this package.
+const EWrongPublisher: u64 = 5;
 
 /// The `Roles` struct is generic and uses a `Bag` to store different roles and their
 /// configurations. This allows adding more roles in the future without changing the
@@ -40,10 +43,12 @@ public struct Role<phantom T> has copy, store, drop {
     addr: address,
 }
 
-/// Core administrative role which can authorize and deauthorize other roles.
+/// `AdminRole` is the top-level administrative role, managing other roles and authorizing
+/// high-impact actions.
 public struct AdminRole {}
 
-/// Represents a role that can manage a `Safe`.
+/// `SafeManagerRole` focuses on managing the `Safe`, with permissions to perform balance
+/// adjustments or routine transfers.
 public struct SafeManagerRole {}
 
 // === Internal functions ===
@@ -101,6 +106,11 @@ public(package) fun config<R, V: store + drop>(roles: &Roles, addr: address): &V
 /// Raises `EUnauthorizedUser` if the address is not authorized.
 public(package) fun assert_has_role<R>(roles: &Roles, addr: address) {
     assert!(is_authorized<R>(roles, addr), EUnauthorizedUser);
+}
+
+/// Asserts that the given `Publisher` is indeed coming from current package.
+public(package) fun assert_publisher_from_package(self: &Publisher) {
+    assert!(self.from_package<AdminRole>(), EWrongPublisher);
 }
 
 /// Returns the current count of administrators in the system.
