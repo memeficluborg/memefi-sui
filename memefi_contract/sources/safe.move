@@ -1,3 +1,12 @@
+/// This module provides a secure container, the `Safe`, for holding MEMEFI token balance
+/// with controlled access via role-based permissions.
+///
+/// Key functionalities:
+/// - Deposits and Withdrawals: Allows authorized `SafeManagerRole` addresses to deposit
+/// and withdraw specific amounts, while Admins can withdraw the entire balance.
+/// - Role Management: Publishers can authorize or revoke `AdminRole` and
+/// `SafeManagerRole` for specific addresses, defining who can manage the safe and its
+/// contents.
 module memefi::safe;
 
 use memefi::memefi::MEMEFI;
