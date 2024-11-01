@@ -20,13 +20,22 @@ use sui::pay;
 use sui::url;
 
 // === Constants ===
-const DECIMALS: u8 = 18;
 const SYMBOL: vector<u8> = b"MEMEFI";
 const NAME: vector<u8> = b"MEMEFI";
 const DESCRIPTION: vector<u8> =
     b"MEMEFI is a community-driven token powering the MemeFi consumer ecosystem.";
 const ICON_URL: vector<u8> = b"https://memefi.club/image.svg"; // TODO: Update coin image
-const TOTAL_SUPPLY: u64 = 10_000_000_000;
+
+#[allow(unused_const)]
+/// The amount of decimals per `MEMEFI` token
+const MEMEFI_DECIMALS: u64 = 1_000_000_000_000_000_000;
+
+#[allow(unused_const)]
+/// The total supply of `MEMEFI` denominated in whole `MEMEFI` tokens (10 Billion)
+const TOTAL_SUPPLY_BASE: u64 = 10_000_000_000;
+
+/// The total supply of `MEMEFI` with decimals (10 Billion * 10^9)
+const TOTAL_SUPPLY_MEMEFI: u64 = 10_000_000_000_000_000_000;
 
 /// Name of the coin
 public struct MEMEFI has drop {}
@@ -35,7 +44,7 @@ public struct MEMEFI has drop {}
 fun init(otw: MEMEFI, ctx: &mut TxContext) {
     let (mut treasury_cap, coin_metadata) = coin::create_currency(
         otw,
-        DECIMALS,
+        9,
         SYMBOL,
         NAME,
         DESCRIPTION,
@@ -47,7 +56,7 @@ fun init(otw: MEMEFI, ctx: &mut TxContext) {
     transfer::public_freeze_object(coin_metadata);
 
     // Mint the total supply of `MEMEFI` tokens.
-    let balance = treasury_cap.mint_balance(TOTAL_SUPPLY);
+    let balance = treasury_cap.mint_balance(TOTAL_SUPPLY_MEMEFI);
     let coin = coin::from_balance(balance, ctx);
     pay::keep(coin, ctx);
 

@@ -20,8 +20,8 @@ use sui::event;
 use sui::package::{Self, Publisher};
 use sui::table::{Self, Table};
 
-/// The maximum number of tokens that can be sent in one PTB.
-const MAX_TOKEN_LIMIT: u64 = 10_000_000;
+/// The maximum number of tokens that can be sent in one PTB (10 million * 10^9).
+const MAX_TOKEN_LIMIT: u64 = 10_000_000_000_000_000;
 
 /// Cannot airdrop twice to a user.
 const EAlreadyAirdropped: u64 = 0;
@@ -105,7 +105,7 @@ public fun send_token<T>(
     ctx: &mut TxContext,
 ) {
     // Ensure the sender is the same as the address in the role we hold.
-    assert!(config.role.addr<ApiRole>() == ctx.sender(), EInvalidSender);
+    assert!(config.role.addr() == ctx.sender(), EInvalidSender);
 
     // Ensure the user has not been airdropped already.
     assert!(!registry.is_airdropped(user_id), EAlreadyAirdropped);
@@ -142,7 +142,7 @@ public fun finalize_send(
     assert!(tokens <= max_token_limit, ETokenLimitExceeded);
 
     // Ensure the sender is the same as the address in the role we hold.
-    assert!(role.addr<ApiRole>() == ctx.sender(), EInvalidSender);
+    assert!(role.addr() == ctx.sender(), EInvalidSender);
 
     registry.roles_mut().authorize(role);
 }
