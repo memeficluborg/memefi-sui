@@ -6,7 +6,7 @@ use sui::pay;
 use sui::test_scenario as ts;
 use sui::test_utils;
 
-const TOTAL_SUPPLY: u64 = 10_000_000_000;
+const TOTAL_SUPPLY: u64 = 10_000_000_000_000_000_000;
 
 public struct TEST_MEMEFI has drop {}
 
@@ -15,7 +15,7 @@ fun test_mint_memefi() {
     let mut ts = ts::begin(@0x2);
     let mut treasury_cap = create_test_treasury(ts.ctx());
 
-    ts::next_tx(&mut ts, @0x2);
+    ts.next_tx(@0x2);
 
     // Mint the total supply of `MEMEFI` tokens and send the whole supply to @0x2.
     let balance = treasury_cap.mint_balance(TOTAL_SUPPLY);
@@ -24,12 +24,12 @@ fun test_mint_memefi() {
 
     // Confirm that @0x2 has received the MEMEFI coin and the value is equal to
     // TOTAL_SUPPLY.
-    ts::next_tx(&mut ts, @0x2);
-    let coin = ts::take_from_sender<Coin<TEST_MEMEFI>>(&ts);
+    ts.next_tx(@0x2);
+    let coin = ts.take_from_sender<Coin<TEST_MEMEFI>>();
     assert!(coin.value() == TOTAL_SUPPLY);
 
-    ts::next_tx(&mut ts, @0x2);
-    ts::return_to_sender(&ts, coin);
+    ts.next_tx(@0x2);
+    ts.return_to_sender(coin);
 
     test_utils::destroy(treasury_cap);
     ts::end(ts);

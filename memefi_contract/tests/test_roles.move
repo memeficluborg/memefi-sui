@@ -31,18 +31,18 @@ fun publisher_authorizes_new_api() {
     let mut ts = ts::begin(@0x2);
     airdrop::test_init(ts.ctx());
 
-    ts::next_tx(&mut ts, @0x2);
-    let publisher = ts::take_from_sender<Publisher>(&ts);
-    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
+    ts.next_tx(@0x2);
+    let publisher = ts.take_from_sender<Publisher>();
+    let mut registry = ts.take_shared<AirdropRegistry>();
 
     airdrop::authorize_api(&mut registry, &publisher, @0x5, ts.ctx());
 
-    ts::next_tx(&mut ts, @0x2);
+    ts.next_tx(@0x2);
     assert!(registry.roles().is_authorized<ApiRole>(@0x5));
 
     ts::return_shared(registry);
-    ts::return_to_sender(&ts, publisher);
-    ts::end(ts);
+    ts.return_to_sender(publisher);
+    ts.end();
 }
 
 #[test]
@@ -50,20 +50,20 @@ fun publisher_deauthorizes_api() {
     let mut ts = ts::begin(@0x2);
     airdrop::test_init(ts.ctx());
 
-    ts::next_tx(&mut ts, @0x2);
-    let publisher = ts::take_from_sender<Publisher>(&ts);
-    let mut registry = ts::take_shared<AirdropRegistry>(&ts);
+    ts.next_tx(@0x2);
+    let publisher = ts.take_from_sender<Publisher>();
+    let mut registry = ts.take_shared<AirdropRegistry>();
 
     airdrop::authorize_api(&mut registry, &publisher, @0x5, ts.ctx());
 
-    ts::next_tx(&mut ts, @0x2);
+    ts.next_tx(@0x2);
     assert!(registry.roles().is_authorized<ApiRole>(@0x5));
 
-    ts::next_tx(&mut ts, @0x2);
-    airdrop::deauthorize_api(&mut registry, &publisher, @0x5, ts.ctx());
+    ts.next_tx(@0x2);
+    registry.deauthorize_api(&publisher, @0x5, ts.ctx());
     assert!(!registry.roles().is_authorized<ApiRole>(@0x5));
 
     ts::return_shared(registry);
-    ts::return_to_sender(&ts, publisher);
-    ts::end(ts);
+    ts.return_to_sender(publisher);
+    ts.end();
 }
