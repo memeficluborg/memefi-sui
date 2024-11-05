@@ -20,3 +20,5 @@ async function main() {
 }
 
 main();
+
+// Example transaction digest: BdxDcfZ5SpqU8yZF8GVsj866kcb5xwJhUGmR7fcPEvpe
