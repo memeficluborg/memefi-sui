@@ -4,18 +4,17 @@ import { safe } from "../types/0x7f7a37c826c88bcfe9aecc042453395ddfa9df6f29cb7c9
 import { getDefaultAdminSignerKeypair } from "../helpers/getSigner";
 import { MEMEFI_COIN_TYPE } from "../config";
 
-const ONE_MEMEFI = 1_000_000_000; // 1 token * 10^9 decimals
-
 export const deposit = async (
   client: SuiClient,
   safe_id: string,
   coin_id: string,
+  amount: number,
   publisher_id: string
 ) => {
   const tx = new Transaction();
 
   // Create a new coin object from the coin_id with the balance we want to deposit.
-  const [coin_to_deposit] = tx.splitCoins(tx.object(coin_id), [ONE_MEMEFI]);
+  const [coin_to_deposit] = tx.splitCoins(tx.object(coin_id), [amount]);
   coin_to_deposit["kind"] = "Input";
 
   safe.builder.put(
