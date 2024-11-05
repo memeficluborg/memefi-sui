@@ -20,20 +20,20 @@ export const authorizeApiRole = async (
   ]);
 
   // === Execute the transaction and get the effects ===
-  // const result = await client.signAndExecuteTransaction({
-  //   transaction: tx,
-  //   signer: getDefaultAdminSignerKeypair(),
-  //   options: {
-  //     showEffects: true,
-  //     showObjectChanges: true,
-  //   },
-  // });
+  const result = await client.signAndExecuteTransaction({
+    transaction: tx,
+    signer: getDefaultAdminSignerKeypair(),
+    options: {
+      showEffects: true,
+      showObjectChanges: true,
+    },
+  });
 
   // === Run the transaction in dev-inspect mode without executing it ===
-  const result = await client.devInspectTransactionBlock({
-    transactionBlock: tx,
-    sender: getDefaultAdminSignerKeypair().getPublicKey().toSuiAddress(),
-  });
+  // const result = await client.devInspectTransactionBlock({
+  //   transactionBlock: tx,
+  //   sender: getDefaultAdminSignerKeypair().getPublicKey().toSuiAddress(),
+  // });
 
   console.log("Authorization transaction result:", result);
   return result;
