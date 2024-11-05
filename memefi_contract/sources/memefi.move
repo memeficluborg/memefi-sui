@@ -28,7 +28,7 @@ const ICON_URL: vector<u8> = b"https://memefi.club/image.svg"; // TODO: Update c
 
 #[allow(unused_const)]
 /// The amount of decimals per `MEMEFI` token
-const MEMEFI_DECIMALS: u64 = 1_000_000_000_000_000_000;
+const MEMEFI_DECIMALS: u64 = 1_000_000_000;
 
 #[allow(unused_const)]
 /// The total supply of `MEMEFI` denominated in whole `MEMEFI` tokens (10 Billion)
