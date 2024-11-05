@@ -5,7 +5,6 @@ import {
   PUBLISHER_ID,
   API_ADDRESS,
 } from "./config";
-import { _0x2 } from "@typemove/sui/builtin";
 
 async function main() {
   try {

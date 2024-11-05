@@ -7,7 +7,9 @@
     "generateTypes": "env-cmd -f .env pnpm typemove-sui --target-dir=./src/types --abi-dir=./src/abis $PACKAGE_ID --network=testnet",
     "testAirdrop": "env-cmd -f .env ts-node src/testAirdrop.ts",
     "testAuthorize": "env-cmd -f .env ts-node src/testAuthorize.ts",
-    "testDeauthorize": "env-cmd -f .env ts-node src/testDeauthorize.ts"
+    "testDeauthorize": "env-cmd -f .env ts-node src/testDeauthorize.ts",
+    "testSafeDeposit": "env-cmd -f .env ts-node src/testSafeDeposit.ts",
+    "testSafeWithdraw": "env-cmd -f .env ts-node src/testSafeWithdraw.ts"
   },
   "keywords": [],
   "author": "",
