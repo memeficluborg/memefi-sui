@@ -6,11 +6,9 @@ import {
   SHARED_SAFE,
   API_ADDRESS,
   MEMEFI_COIN_TYPE,
-  PUBLISHER_ID,
 } from "./config";
 import { airdrop } from "./types/0x7f7a37c826c88bcfe9aecc042453395ddfa9df6f29cb7c97590bf86cf2b0a75e";
 import { getDefaultAdminSignerKeypair } from "./helpers/getSigner";
-import { authorizeApiRole } from "./utils/txAuthorize";
 
 interface Airdrop {
   client: SuiClient; // SuiClient instance
