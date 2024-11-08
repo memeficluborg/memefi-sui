@@ -26,14 +26,6 @@ const DESCRIPTION: vector<u8> =
     b"MEMEFI is a community-driven token powering the MemeFi consumer ecosystem.";
 const ICON_URL: vector<u8> = b"https://memefi.club/image.svg"; // TODO: Update coin image
 
-#[allow(unused_const)]
-/// The amount of decimals per `MEMEFI` token
-const MEMEFI_DECIMALS: u64 = 1_000_000_000;
-
-#[allow(unused_const)]
-/// The total supply of `MEMEFI` denominated in whole `MEMEFI` tokens (10 Billion)
-const TOTAL_SUPPLY_BASE: u64 = 10_000_000_000;
-
 /// The total supply of `MEMEFI` with decimals (10 Billion * 10^9)
 const TOTAL_SUPPLY_MEMEFI: u64 = 10_000_000_000_000_000_000;
 
