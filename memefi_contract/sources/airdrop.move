@@ -50,6 +50,7 @@ public struct AirdropConfig {
 /// AirdropEvent is emitted when tokens are airdropped to an address.
 /// It records the recipient's address and the value of tokens airdropped.
 public struct AirdropEvent<phantom T> has copy, drop {
+    user_id: String,
     addr: address,
     value: u64,
 }
@@ -115,7 +116,11 @@ public fun send_token<T>(
 
     // Withdraw the required balance from the Safe and create a new `Coin<T>`.
     let airdrop_coin = coin::take<T>(self.balance_mut<T>(), value, ctx);
-    event::emit(AirdropEvent<T> { addr: user_addr, value: airdrop_coin.value() });
+    event::emit(AirdropEvent<T> {
+        user_id,
+        addr: user_addr,
+        value: airdrop_coin.value(),
+    });
 
     // Add the user's ID in the record.
     registry.add_record(user_id, ctx);
