@@ -21,7 +21,7 @@ interface Airdrop {
 
 const EXAMPLE_AIRDROP_AMOUNT = 1_000_000_000; // 1 token * 10^9 decimals
 const EXAMPLE_USER_ADDRESS = API_ADDRESS;
-const EXAMPLE_USER_TELEGRAM_ID = "1234567890";
+const EXAMPLE_USER_TELEGRAM_ID = "1234567891";
 const ONE_MEMEFI = 1_000_000_000; // 1 token * 10^9 decimals
 
 async function testAirdrop({
@@ -39,25 +39,17 @@ async function testAirdrop({
   try {
     const tx = new Transaction();
 
-    // Specify input types for the transaction (typemove specific fix)
-    let userAddressArg = tx.pure.address(userAddress);
-    userAddressArg["kind"] = "Input";
-
-    let tokenValue = tx.pure.u64(BigInt(value));
-    tokenValue["kind"] = "Input";
-
     // Step 1: Initialize the airdrop
     let [airdrop_config] = airdrop.builder.initSend(tx, [registryId]);
-    airdrop_config["kind"] = "Input";
 
     // Step 2: Airdrop a specific amount of tokens to a specific address
     airdrop.builder.sendToken(
       tx,
       [
         tx.object(safeId),
-        tokenValue,
+        tx.pure.u64(BigInt(value)),
         userTelegramId,
-        userAddressArg,
+        tx.pure.address(userAddress),
         tx.object(registryId),
         airdrop_config,
       ],

@@ -11,12 +11,10 @@ export const authorizeApiRole = async (
 ) => {
   const tx = new Transaction();
 
-  let addr = tx.pure.address(targetAddress);
-  addr["kind"] = "Input";
   airdrop.builder.authorizeApi(tx, [
     tx.object(airdrop_registry),
     tx.object(publisher_id),
-    addr,
+    tx.pure.address(targetAddress),
   ]);
 
   // === Execute the transaction and get the effects ===
