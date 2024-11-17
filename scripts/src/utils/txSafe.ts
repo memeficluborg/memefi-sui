@@ -15,7 +15,6 @@ export const deposit = async (
 
   // Create a new coin object from the coin_id with the balance we want to deposit.
   const [coin_to_deposit] = tx.splitCoins(tx.object(coin_id), [amount]);
-  coin_to_deposit["kind"] = "Input";
 
   safe.builder.put(
     tx,

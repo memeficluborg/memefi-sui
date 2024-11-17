@@ -6,7 +6,7 @@ config({});
 
 type NetworkEnvironment = "devnet" | "testnet" | "mainnet";
 
-export const SUI_NETWORK = `https://rpc.${process.env.SUI_ENV}.sui.io:443`;
+export const SUI_NETWORK = process.env.SUI_NETWORK!;
 export const ACTIVE_NETWORK = (process.env.SUI_ENV ??
   "devnet") as NetworkEnvironment;
 export const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS!;

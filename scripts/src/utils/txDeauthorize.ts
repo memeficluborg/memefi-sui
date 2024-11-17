@@ -11,29 +11,27 @@ export const deauthorizeApiRole = async (
 ) => {
   const tx = new Transaction();
 
-  let addr = tx.pure.address(targetAddress);
-  addr["kind"] = "Input";
   airdrop.builder.deauthorizeApi(tx, [
     tx.object(airdrop_registry),
     tx.object(publisher_id),
-    addr,
+    tx.pure.address(targetAddress),
   ]);
 
   // === Execute the transaction and get the effects ===
-  // const result = await client.signAndExecuteTransaction({
-  //   transaction: tx,
-  //   signer: getDefaultAdminSignerKeypair(),
-  //   options: {
-  //     showEffects: true,
-  //     showObjectChanges: true,
-  //   },
-  // });
+  const result = await client.signAndExecuteTransaction({
+    transaction: tx,
+    signer: getDefaultAdminSignerKeypair(),
+    options: {
+      showEffects: true,
+      showObjectChanges: true,
+    },
+  });
 
   // === Run the transaction in dev-inspect mode without executing it ===
-  const result = await client.devInspectTransactionBlock({
-    transactionBlock: tx,
-    sender: getDefaultAdminSignerKeypair().getPublicKey().toSuiAddress(),
-  });
+  //   const result = await client.devInspectTransactionBlock({
+  //     transactionBlock: tx,
+  //     sender: getDefaultAdminSignerKeypair().getPublicKey().toSuiAddress(),
+  //   });
 
   console.log("Deauthorization transaction result:", result);
   return result;

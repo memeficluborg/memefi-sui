@@ -22,24 +22,15 @@ import {
 import { SuiClient } from "@mysten/sui/client";
 import {
   transactionArgumentOrObject,
-  transactionArgumentOrVec,
   transactionArgumentOrPure,
-  transactionArgumentOrPureU8,
-  transactionArgumentOrPureU16,
-  transactionArgumentOrPureU32,
-  transactionArgumentOrPureU64,
-  transactionArgumentOrPureU128,
-  transactionArgumentOrPureU256,
-  transactionArgumentOrPureBool,
-  transactionArgumentOrPureString,
-  transactionArgumentOrPureAddress,
+  transactionArgumentOrVec,
 } from "@typemove/sui";
 
-import * as _0x2 from "@typemove/sui/builtin/0x2";
+import { _0x2 } from "@typemove/sui/builtin";
 
 export namespace airdrop {
   export interface AIRDROP {
-    dummy_field: boolean;
+    dummy_field: Boolean;
   }
 
   export namespace AIRDROP {
@@ -95,9 +86,9 @@ export namespace airdrop {
   }
 
   export interface AirdropRegistry {
-    id: _0x2.object$.UID;
+    id: _0x2.object_.UID;
     roles: roles.Roles;
-    record: _0x2.table.Table<string, boolean>;
+    record: _0x2.table.Table<string, Boolean>;
   }
 
   export namespace AirdropRegistry {
@@ -144,7 +135,7 @@ export namespace airdrop {
       const _args: any[] = [];
       _args.push(transactionArgumentOrObject(args[0], tx));
       _args.push(transactionArgumentOrObject(args[1], tx));
-      _args.push(transactionArgumentOrPureAddress(args[2], tx));
+      _args.push(transactionArgumentOrPure(args[2], tx));
 
       // @ts-ignore
       return tx.moveCall({
@@ -165,7 +156,7 @@ export namespace airdrop {
       const _args: any[] = [];
       _args.push(transactionArgumentOrObject(args[0], tx));
       _args.push(transactionArgumentOrObject(args[1], tx));
-      _args.push(transactionArgumentOrPureAddress(args[2], tx));
+      _args.push(transactionArgumentOrPure(args[2], tx));
 
       // @ts-ignore
       return tx.moveCall({
@@ -292,9 +283,9 @@ export namespace airdrop {
       ] {
       const _args: any[] = [];
       _args.push(transactionArgumentOrObject(args[0], tx));
-      _args.push(transactionArgumentOrPureU64(args[1], tx));
+      _args.push(transactionArgumentOrPure(args[1], tx));
       _args.push(transactionArgumentOrPure(args[2], tx));
-      _args.push(transactionArgumentOrPureAddress(args[3], tx));
+      _args.push(transactionArgumentOrPure(args[3], tx));
       _args.push(transactionArgumentOrObject(args[4], tx));
       _args.push(transactionArgumentOrObject(args[5], tx));
 
@@ -314,7 +305,10 @@ export namespace airdrop {
   export namespace view {
     export async function addRecord(
       client: SuiClient,
-      args: [string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
       builder.addRecord(tx, args);
@@ -329,7 +323,11 @@ export namespace airdrop {
     }
     export async function authorizeApi(
       client: SuiClient,
-      args: [string, string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
       builder.authorizeApi(tx, args);
@@ -344,7 +342,11 @@ export namespace airdrop {
     }
     export async function deauthorizeApi(
       client: SuiClient,
-      args: [string, string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
       builder.deauthorizeApi(tx, args);
@@ -359,7 +361,10 @@ export namespace airdrop {
     }
     export async function finalizeSend(
       client: SuiClient,
-      args: [string, airdrop.AirdropConfig],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        airdrop.AirdropConfig | TransactionArgument,
+      ],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
       builder.finalizeSend(tx, args);
@@ -374,7 +379,7 @@ export namespace airdrop {
     }
     export async function initSend(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
     ): Promise<TypedDevInspectResults<[airdrop.AirdropConfig]>> {
       const tx = new Transaction();
       builder.initSend(tx, args);
@@ -389,8 +394,11 @@ export namespace airdrop {
     }
     export async function isAirdropped(
       client: SuiClient,
-      args: [string, string],
-    ): Promise<TypedDevInspectResults<[boolean]>> {
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
+    ): Promise<TypedDevInspectResults<[Boolean]>> {
       const tx = new Transaction();
       builder.isAirdropped(tx, args);
       const inspectRes = await client.devInspectTransactionBlock({
@@ -398,13 +406,16 @@ export namespace airdrop {
         sender: ZERO_ADDRESS,
       });
 
-      return (await getMoveCoder(client)).decodeDevInspectResult<[boolean]>(
+      return (await getMoveCoder(client)).decodeDevInspectResult<[Boolean]>(
         inspectRes,
       );
     }
     export async function removeRecord(
       client: SuiClient,
-      args: [string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
       builder.removeRecord(tx, args);
@@ -419,7 +430,7 @@ export namespace airdrop {
     }
     export async function roles(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
     ): Promise<TypedDevInspectResults<[string]>> {
       const tx = new Transaction();
       builder.roles(tx, args);
@@ -434,7 +445,7 @@ export namespace airdrop {
     }
     export async function rolesMut(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
     ): Promise<TypedDevInspectResults<[string]>> {
       const tx = new Transaction();
       builder.rolesMut(tx, args);
@@ -449,7 +460,14 @@ export namespace airdrop {
     }
     export async function sendToken<T0 = any>(
       client: SuiClient,
-      args: [string, bigint, string, string, string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        bigint | TransactionArgument,
+        string | TransactionArgument,
+        string | TransactionArgument,
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionObjectArgument | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
@@ -468,7 +486,7 @@ export namespace airdrop {
 
 export namespace memefi {
   export interface MEMEFI {
-    dummy_field: boolean;
+    dummy_field: Boolean;
   }
 
   export namespace MEMEFI {
@@ -488,7 +506,7 @@ export namespace memefi {
 
 export namespace roles {
   export interface ApiRole {
-    dummy_field: boolean;
+    dummy_field: Boolean;
   }
 
   export namespace ApiRole {
@@ -570,7 +588,7 @@ export namespace roles {
     ): TransactionArgument & [TransactionArgument, TransactionArgument] {
       const _args: any[] = [];
       _args.push(transactionArgumentOrObject(args[0], tx));
-      _args.push(transactionArgumentOrPureAddress(args[1], tx));
+      _args.push(transactionArgumentOrPure(args[1], tx));
 
       // @ts-ignore
       return tx.moveCall({
@@ -632,7 +650,7 @@ export namespace roles {
     ): TransactionArgument & [TransactionArgument, TransactionArgument] {
       const _args: any[] = [];
       _args.push(transactionArgumentOrObject(args[0], tx));
-      _args.push(transactionArgumentOrPureAddress(args[1], tx));
+      _args.push(transactionArgumentOrPure(args[1], tx));
 
       // @ts-ignore
       return tx.moveCall({
@@ -711,7 +729,7 @@ export namespace roles {
     ): TransactionArgument & [TransactionArgument, TransactionArgument] {
       const _args: any[] = [];
       _args.push(transactionArgumentOrObject(args[0], tx));
-      _args.push(transactionArgumentOrPureAddress(args[1], tx));
+      _args.push(transactionArgumentOrPure(args[1], tx));
 
       // @ts-ignore
       return tx.moveCall({
@@ -725,7 +743,7 @@ export namespace roles {
         ],
       });
     }
-    export function new$(tx: Transaction, args: []): TransactionArgument & [] {
+    export function new_(tx: Transaction, args: []): TransactionArgument & [] {
       const _args: any[] = [];
 
       // @ts-ignore
@@ -741,7 +759,7 @@ export namespace roles {
       typeArguments: [TypeDescriptor<T0> | string],
     ): TransactionArgument & [TransactionArgument] {
       const _args: any[] = [];
-      _args.push(transactionArgumentOrPureAddress(args[0], tx));
+      _args.push(transactionArgumentOrPure(args[0], tx));
 
       // @ts-ignore
       return tx.moveCall({
@@ -759,7 +777,7 @@ export namespace roles {
   export namespace view {
     export async function addr<T0 = any>(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[string]>> {
       const tx = new Transaction();
@@ -775,7 +793,10 @@ export namespace roles {
     }
     export async function assertHasRole<T0 = any>(
       client: SuiClient,
-      args: [string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
@@ -791,7 +812,7 @@ export namespace roles {
     }
     export async function assertPublisherFromPackage(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
       builder.assertPublisherFromPackage(tx, args);
@@ -806,7 +827,10 @@ export namespace roles {
     }
     export async function authorize<T0 = any>(
       client: SuiClient,
-      args: [string, roles.Role<T0>],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        roles.Role<T0> | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
@@ -822,7 +846,10 @@ export namespace roles {
     }
     export async function config<T0 = any, T1 = any>(
       client: SuiClient,
-      args: [string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string, TypeDescriptor<T1> | string],
     ): Promise<TypedDevInspectResults<[string]>> {
       const tx = new Transaction();
@@ -838,7 +865,7 @@ export namespace roles {
     }
     export async function data(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
     ): Promise<TypedDevInspectResults<[string]>> {
       const tx = new Transaction();
       builder.data(tx, args);
@@ -853,9 +880,12 @@ export namespace roles {
     }
     export async function deauthorize<T0 = any>(
       client: SuiClient,
-      args: [string, roles.Role<T0>],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        roles.Role<T0> | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string],
-    ): Promise<TypedDevInspectResults<[boolean]>> {
+    ): Promise<TypedDevInspectResults<[Boolean]>> {
       const tx = new Transaction();
       builder.deauthorize(tx, args, typeArguments);
       const inspectRes = await client.devInspectTransactionBlock({
@@ -863,13 +893,13 @@ export namespace roles {
         sender: ZERO_ADDRESS,
       });
 
-      return (await getMoveCoder(client)).decodeDevInspectResult<[boolean]>(
+      return (await getMoveCoder(client)).decodeDevInspectResult<[Boolean]>(
         inspectRes,
       );
     }
     export async function destroyEmpty(
       client: SuiClient,
-      args: [roles.Roles],
+      args: [roles.Roles | TransactionArgument],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
       builder.destroyEmpty(tx, args);
@@ -884,9 +914,12 @@ export namespace roles {
     }
     export async function isAuthorized<T0 = any>(
       client: SuiClient,
-      args: [string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string],
-    ): Promise<TypedDevInspectResults<[boolean]>> {
+    ): Promise<TypedDevInspectResults<[Boolean]>> {
       const tx = new Transaction();
       builder.isAuthorized(tx, args, typeArguments);
       const inspectRes = await client.devInspectTransactionBlock({
@@ -894,16 +927,16 @@ export namespace roles {
         sender: ZERO_ADDRESS,
       });
 
-      return (await getMoveCoder(client)).decodeDevInspectResult<[boolean]>(
+      return (await getMoveCoder(client)).decodeDevInspectResult<[Boolean]>(
         inspectRes,
       );
     }
-    export async function new$(
+    export async function new_(
       client: SuiClient,
       args: [],
     ): Promise<TypedDevInspectResults<[roles.Roles]>> {
       const tx = new Transaction();
-      builder.new$(tx, args);
+      builder.new_(tx, args);
       const inspectRes = await client.devInspectTransactionBlock({
         transactionBlock: tx,
         sender: ZERO_ADDRESS,
@@ -915,7 +948,7 @@ export namespace roles {
     }
     export async function newRole<T0 = any>(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[roles.Role<T0>]>> {
       const tx = new Transaction();
@@ -934,7 +967,7 @@ export namespace roles {
 
 export namespace safe {
   export interface Safe<T0> {
-    id: _0x2.object$.UID;
+    id: _0x2.object_.UID;
     balance: _0x2.balance.Balance<T0>;
   }
 
@@ -992,7 +1025,7 @@ export namespace safe {
         ],
       });
     }
-    export function delete$<T0 = any>(
+    export function delete_<T0 = any>(
       tx: Transaction,
       args: [safe.Safe<T0> | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
@@ -1012,7 +1045,7 @@ export namespace safe {
         ],
       });
     }
-    export function new$<T0 = any>(
+    export function new_<T0 = any>(
       tx: Transaction,
       args: [],
       typeArguments: [TypeDescriptor<T0> | string],
@@ -1106,7 +1139,7 @@ export namespace safe {
   export namespace view {
     export async function balance<T0 = any>(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[bigint]>> {
       const tx = new Transaction();
@@ -1122,7 +1155,7 @@ export namespace safe {
     }
     export async function balanceMut<T0 = any>(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[string]>> {
       const tx = new Transaction();
@@ -1136,13 +1169,13 @@ export namespace safe {
         inspectRes,
       );
     }
-    export async function delete$<T0 = any>(
+    export async function delete_<T0 = any>(
       client: SuiClient,
-      args: [safe.Safe<T0>],
+      args: [safe.Safe<T0> | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
-      builder.delete$(tx, args, typeArguments);
+      builder.delete_(tx, args, typeArguments);
       const inspectRes = await client.devInspectTransactionBlock({
         transactionBlock: tx,
         sender: ZERO_ADDRESS,
@@ -1152,13 +1185,13 @@ export namespace safe {
         inspectRes,
       );
     }
-    export async function new$<T0 = any>(
+    export async function new_<T0 = any>(
       client: SuiClient,
       args: [],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[safe.Safe<T0>]>> {
       const tx = new Transaction();
-      builder.new$(tx, args, typeArguments);
+      builder.new_(tx, args, typeArguments);
       const inspectRes = await client.devInspectTransactionBlock({
         transactionBlock: tx,
         sender: ZERO_ADDRESS,
@@ -1170,7 +1203,11 @@ export namespace safe {
     }
     export async function put<T0 = any>(
       client: SuiClient,
-      args: [string, _0x2.coin.Coin<T0>, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        _0x2.coin.Coin<T0> | TransactionArgument,
+        string | TransactionObjectArgument | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
@@ -1186,7 +1223,7 @@ export namespace safe {
     }
     export async function share<T0 = any>(
       client: SuiClient,
-      args: [safe.Safe<T0>],
+      args: [safe.Safe<T0> | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
@@ -1202,7 +1239,10 @@ export namespace safe {
     }
     export async function withdraw<T0 = any>(
       client: SuiClient,
-      args: [string, string],
+      args: [
+        string | TransactionObjectArgument | TransactionArgument,
+        string | TransactionObjectArgument | TransactionArgument,
+      ],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[_0x2.coin.Coin<T0>]>> {
       const tx = new Transaction();
@@ -1221,7 +1261,7 @@ export namespace safe {
 
 export namespace treasury {
   export interface TreasuryCapKey {
-    dummy_field: boolean;
+    dummy_field: Boolean;
   }
 
   export namespace TreasuryCapKey {
@@ -1242,7 +1282,7 @@ export namespace treasury {
   }
 
   export interface WrappedTreasury<T0> {
-    id: _0x2.object$.UID;
+    id: _0x2.object_.UID;
   }
 
   export namespace WrappedTreasury {
@@ -1325,7 +1365,7 @@ export namespace treasury {
   export namespace view {
     export async function share<T0 = any>(
       client: SuiClient,
-      args: [treasury.WrappedTreasury<T0>],
+      args: [treasury.WrappedTreasury<T0> | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[]>> {
       const tx = new Transaction();
@@ -1341,7 +1381,7 @@ export namespace treasury {
     }
     export async function totalSupply<T0 = any>(
       client: SuiClient,
-      args: [string],
+      args: [string | TransactionObjectArgument | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[bigint]>> {
       const tx = new Transaction();
@@ -1357,7 +1397,7 @@ export namespace treasury {
     }
     export async function wrap<T0 = any>(
       client: SuiClient,
-      args: [_0x2.coin.TreasuryCap<T0>],
+      args: [_0x2.coin.TreasuryCap<T0> | TransactionArgument],
       typeArguments: [TypeDescriptor<T0> | string],
     ): Promise<TypedDevInspectResults<[treasury.WrappedTreasury<T0>]>> {
       const tx = new Transaction();

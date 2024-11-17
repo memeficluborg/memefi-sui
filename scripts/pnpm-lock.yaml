@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@mysten/sui':
-        specifier: ^1.14.0
-        version: 1.14.0(typescript@5.6.3)
+        specifier: ^1.14.3
+        version: 1.14.3(typescript@5.6.3)
       '@typemove/move':
-        specifier: ^1.6.6
-        version: 1.6.6
+        specifier: ^1.6.12
+        version: 1.6.12
       '@typemove/sui':
-        specifier: ^1.6.6
-        version: 1.6.6(typescript@5.6.3)
+        specifier: ^1.6.12
+        version: 1.6.12(typescript@5.6.3)
       '@types/node':
-        specifier: ^22.8.6
-        version: 22.8.6
+        specifier: ^22.9.0
+        version: 22.9.0
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -28,7 +28,7 @@ importers:
         version: 10.1.0
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@22.8.6)(typescript@5.6.3)
+        version: 10.9.2(@types/node@22.9.0)(typescript@5.6.3)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -38,8 +38,8 @@ importers:
 
 packages:
 
-  '@0no-co/graphql.web@1.0.10':
-    resolution: {integrity: sha512-Nu/d8aLvBEGOEH/739AmEKr9Dwl6lIMTfYUwyLjtv1JK/9MdAXrrIKz50IVOcjF9TM7OBxR1uFvZ27CePk9UyQ==}
+  '@0no-co/graphql.web@1.0.11':
+    resolution: {integrity: sha512-xuSJ9WXwTmtngWkbdEoopMo6F8NLtjy84UNAMsAr5C3/2SgAL/dEU10TMqTIsipqPQ8HA/7WzeqQ9DEQxSvPPA==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     peerDependenciesMeta:
@@ -94,8 +94,8 @@ packages:
   '@mysten/bcs@1.1.0':
     resolution: {integrity: sha512-yy9/1Y4d0FlRywS1+9ze/T7refCbrvwFwJIOKs9M3QBK1njbcHZp+LkVeLqBvIJA5eZ3ZCzmhQ1Xq4Sed5mEBA==}
 
-  '@mysten/sui@1.14.0':
-    resolution: {integrity: sha512-dVndFXe1YaiJdNMfO5ZqmcrKxqWaR8TLBd5PT7M3OQeud3wo1EXFSZhT2b2FUsLMa04t+kOYph7kKgqUrfWZyA==}
+  '@mysten/sui@1.14.3':
+    resolution: {integrity: sha512-5vhOnbSAT/9daMIDPYOp7q9j+6DXqjPAYEJy7ZbR9viBsyAx4UMChCwaLyjoYcJKvhrkDn4LTdDTJEUvpj7TTg==}
     engines: {node: '>=18'}
 
   '@noble/curves@1.6.0':
@@ -130,15 +130,15 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@typemove/move@1.6.6':
-    resolution: {integrity: sha512-i/hW9SjLh0Y7jR9qvWqB+a4fU0Pwy009q4Xd48DQkZIpQSU8DTOvq42vxcYzJ9Q4xkZyb3itDitn6cJkVZS5eg==}
+  '@typemove/move@1.6.12':
+    resolution: {integrity: sha512-3FHwYHpxnglqK9wcG7GNAHYdY3cFkh6yn8fL7uoPxyrgL7gN0/k28QmPIAS6syoSCQLO/x8fHA9BrlnlLod0gw==}
 
-  '@typemove/sui@1.6.6':
-    resolution: {integrity: sha512-HQkZz2R3+kDEbVvb6d2MuHWwUVcbFxT8nw//52ILNrns8TZR9Va0XkC6rPWeIh73++MbnaShTsrXV4CYb6hMqQ==}
+  '@typemove/sui@1.6.12':
+    resolution: {integrity: sha512-lAFgS5QWVNm6fBggXPai9yieUCU/OTbnnLZ838ZZEXE8X4+X88J3yz1/aJuG5H26GVRnyRdwtlT7CaMEYq0yTQ==}
     hasBin: true
 
-  '@types/node@22.8.6':
-    resolution: {integrity: sha512-tosuJYKrIqjQIlVCM4PEGxOmyg3FCPa/fViuJChnGeEIhjA46oy8FMVoF9su1/v8PNs2a8Q0iFNyOx0uOF91nw==}
+  '@types/node@22.9.0':
+    resolution: {integrity: sha512-vuyHg81vvWA1Z1ELfvLko2c8f34gyA0zaic0+Rllc5lbCnbSyuvb2Oxpm6TAUAC/2xZN3QGqxBNggD1nNR2AfQ==}
 
   acorn-walk@8.3.4:
     resolution: {integrity: sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g==}
@@ -176,8 +176,8 @@ packages:
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
 
-  cross-spawn@7.0.3:
-    resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
+  cross-spawn@7.0.5:
+    resolution: {integrity: sha512-ZVJrKKYunU38/76t0RMOulHOnUcbU9GbpWKAOZ0mhjr7CX6FVrH+4FrAapSOekrgFQ3f/8gwMEuIft0aKq6Hug==}
     engines: {node: '>= 8'}
 
   diff@4.0.2:
@@ -275,7 +275,7 @@ packages:
 
 snapshots:
 
-  '@0no-co/graphql.web@1.0.10(graphql@16.9.0)':
+  '@0no-co/graphql.web@1.0.11(graphql@16.9.0)':
     optionalDependencies:
       graphql: 16.9.0
 
@@ -298,7 +298,7 @@ snapshots:
 
   '@gql.tada/internal@1.0.8(graphql@16.9.0)(typescript@5.6.3)':
     dependencies:
-      '@0no-co/graphql.web': 1.0.10(graphql@16.9.0)
+      '@0no-co/graphql.web': 1.0.11(graphql@16.9.0)
       graphql: 16.9.0
       typescript: 5.6.3
 
@@ -319,7 +319,7 @@ snapshots:
     dependencies:
       bs58: 6.0.0
 
-  '@mysten/sui@1.14.0(typescript@5.6.3)':
+  '@mysten/sui@1.14.3(typescript@5.6.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.9.0)
       '@mysten/bcs': 1.1.0
@@ -367,14 +367,14 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@typemove/move@1.6.6':
+  '@typemove/move@1.6.12':
     dependencies:
       radash: 12.1.0
 
-  '@typemove/sui@1.6.6(typescript@5.6.3)':
+  '@typemove/sui@1.6.12(typescript@5.6.3)':
     dependencies:
-      '@mysten/sui': 1.14.0(typescript@5.6.3)
-      '@typemove/move': 1.6.6
+      '@mysten/sui': 1.14.3(typescript@5.6.3)
+      '@typemove/move': 1.6.12
       chalk: 5.3.0
       commander: 12.1.0
       prettier: 3.3.3
@@ -384,7 +384,7 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@types/node@22.8.6':
+  '@types/node@22.9.0':
     dependencies:
       undici-types: 6.19.8
 
@@ -412,7 +412,7 @@ snapshots:
 
   create-require@1.1.1: {}
 
-  cross-spawn@7.0.3:
+  cross-spawn@7.0.5:
     dependencies:
       path-key: 3.1.1
       shebang-command: 2.0.0
@@ -425,11 +425,11 @@ snapshots:
   env-cmd@10.1.0:
     dependencies:
       commander: 4.1.1
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.5
 
   gql.tada@1.8.10(graphql@16.9.0)(typescript@5.6.3):
     dependencies:
-      '@0no-co/graphql.web': 1.0.10(graphql@16.9.0)
+      '@0no-co/graphql.web': 1.0.11(graphql@16.9.0)
       '@0no-co/graphqlsp': 1.12.16(graphql@16.9.0)(typescript@5.6.3)
       '@gql.tada/cli-utils': 1.6.3(@0no-co/graphqlsp@1.12.16(graphql@16.9.0)(typescript@5.6.3))(graphql@16.9.0)(typescript@5.6.3)
       '@gql.tada/internal': 1.0.8(graphql@16.9.0)(typescript@5.6.3)
@@ -457,14 +457,14 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  ts-node@10.9.2(@types/node@22.8.6)(typescript@5.6.3):
+  ts-node@10.9.2(@types/node@22.9.0)(typescript@5.6.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 22.8.6
+      '@types/node': 22.9.0
       acorn: 8.14.0
       acorn-walk: 8.3.4
       arg: 4.1.3
