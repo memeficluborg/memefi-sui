@@ -9,7 +9,8 @@
     "testAuthorize": "env-cmd -f .env ts-node src/testAuthorize.ts",
     "testDeauthorize": "env-cmd -f .env ts-node src/testDeauthorize.ts",
     "testSafeDeposit": "env-cmd -f .env ts-node src/testSafeDeposit.ts",
-    "testSafeWithdraw": "env-cmd -f .env ts-node src/testSafeWithdraw.ts"
+    "testSafeWithdraw": "env-cmd -f .env ts-node src/testSafeWithdraw.ts",
+    "testGasPool": "env-cmd -f .env ts-node src/testGasPool.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,7 @@
     "@typemove/move": "^1.6.12",
     "@typemove/sui": "^1.6.12",
     "@types/node": "^22.9.0",
+    "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "env-cmd": "^10.1.0",
     "ts-node": "^10.9.2",

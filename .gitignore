@@ -19,6 +19,7 @@ yarn-error.log*
 lerna-debug.log*
 pnpm-debug.log*
 sui.log*
+dump.rdb
 
 # Dependency and build-related directories
 node_modules/
@@ -42,3 +43,6 @@ workspace.json
 # Custom temp files for test
 temp*.txt
 .secrets
+
+# Sui gas pool
+sui-gas-pool/
