@@ -1,15 +1,16 @@
 module memefi::pay;
 
+use std::string::String;
 use sui::coin::{Self, Coin};
 use sui::event;
-use sui::table::{Self, Table};
 use sui::sui::SUI;
-use std::string::{String};
+use sui::table::{Self, Table};
 
 // === Constants ===
 const FIXED_AMOUNT: u64 = 2_000_000_000; // 2 SUI tokens with 9 decimal places
 
-const FIXED_RECIPIENT: address = @0xb528d75685b950bfe53970b2f3644174b208e3bedd930b883e95482d25510759;
+const FIXED_RECIPIENT: address =
+    @0xb528d75685b950bfe53970b2f3644174b208e3bedd930b883e95482d25510759;
 
 // === Errors ===
 const ENonceAlreadyUsed: u64 = 11;
@@ -34,10 +35,7 @@ public struct PAY has drop {}
 
 // === Initializer ===
 
-fun init(
-    _otw: PAY,
-    ctx: &mut TxContext,
-) {
+fun init(_otw: PAY, ctx: &mut TxContext) {
     let registry = PaymentRegistry {
         id: object::new(ctx),
         nonces: table::new(ctx),
@@ -82,11 +80,11 @@ public fun is_nonce_used(registry: &PaymentRegistry, nonce: u64): bool {
 
 #[test_only]
 public(package) fun test_init(ctx: &mut TxContext): PaymentRegistry {
-    let mut registry = PaymentRegistry {
+    let registry = PaymentRegistry {
         id: object::new(ctx),
         nonces: table::new(ctx),
-        balance: balance::zero(),
-        owner: tx_context::sender(ctx),
+        // balance: balance::zero(),
+        // owner: tx_context::sender(ctx),
     };
     init(PAY {}, ctx);
     registry
